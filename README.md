@@ -183,6 +183,29 @@ Make sure you have **Node.js (v18+)** and **Python (3.10+)** installed.
 
 ---
 
+## 🚀 Production Deployment Setup
+
+The platform is designed to be deployed across three tiers in production:
+
+### 1. Database (Supabase)
+1. Set up a PostgreSQL project on Supabase.
+2. Retrieve your connection string from **Settings > Database > Connection Strings** (URI format).
+3. Securely set this as your `DATABASE_URL` in the backend environment.
+
+### 2. Backend & Speech-to-Text (Azure VM)
+1. Provision a Linux VM on Azure (Recommended: `Standard_D4s_v5` to support Whisper CPU transcription).
+2. Configure **Nginx** on port `80` to proxy traffic to your FastAPI app running on port `8002`.
+3. Set up **Let's Encrypt SSL** (`certbot`) on the VM so your backend endpoints serve over `https://`.
+4. Run the app using systemd or the provided `docker-compose` settings.
+*For detailed setup commands, refer to the [Backend Deployment Manual](file:///c:/Users/Harsh/Downloads/oneplug/backend/README.md).*
+
+### 3. Frontend (Vercel)
+1. Import your repository into Vercel and set the Root Directory to `frontend`.
+2. Add the environment variable `NEXT_PUBLIC_API_URL` pointing to your secure Azure VM domain (e.g., `https://api.yourdomain.com`).
+3. Deploy.
+
+---
+
 ## 💡 Engineering Highlights
 
 - **Background Ingest Engine:** Audio uploads leverage FastAPI's `BackgroundTasks` to write files and call Whisper out-of-band. This means the client receives an immediate `202 Accepted` response, freeing connection channels and avoiding HTTP gateway timeouts.
