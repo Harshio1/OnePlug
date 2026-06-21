@@ -1,0 +1,90 @@
+@import "tailwindcss";
+
+html {
+  font-size: 130%; /* Globally increased font size */
+}
+
+:root {
+  --background: #090b0e;
+  --foreground: #f3f4f6;
+  
+  --brand-bg: #090b0e;
+  --brand-card: #12161f;
+  --brand-card-hover: #181d29;
+  --brand-border: #222a3a;
+  --brand-green: #00e676;
+  --brand-green-dim: rgba(0, 230, 118, 0.15);
+  --brand-green-hover: #00b35c;
+  --brand-text: #f3f4f6;
+  --brand-text-muted: #9ca3af;
+}
+
+@theme {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  
+  --color-brand-bg: var(--brand-bg);
+  --color-brand-card: var(--brand-card);
+  --color-brand-card-hover: var(--brand-card-hover);
+  --color-brand-border: var(--brand-border);
+  --color-brand-green: var(--brand-green);
+  --color-brand-green-dim: var(--brand-green-dim);
+  --color-brand-green-hover: var(--brand-green-hover);
+  --color-brand-text: var(--brand-text);
+  --color-brand-text-muted: var(--brand-text-muted);
+  
+  --font-sans: Arial, Helvetica, sans-serif;
+}
+
+body {
+  background-color: var(--brand-bg);
+  color: var(--brand-text);
+  font-family: var(--font-sans);
+  font-weight: 400;
+  overflow-x: hidden;
+}
+
+/* Custom premium scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--brand-bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--brand-border);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--brand-green);
+}
+
+/* Custom glow effect animations */
+@keyframes pulse-glow {
+  0%, 100% {
+    opacity: 0.6;
+    box-shadow: 0 0 12px var(--brand-green-dim);
+  }
+  50% {
+    opacity: 1;
+    box-shadow: 0 0 20px rgba(0, 230, 118, 0.35);
+  }
+}
+
+.pulse-green-glow {
+  animation: pulse-glow 2s infinite ease-in-out;
+}
+
+/* Highlighting searched words inside the transcripts */
+.search-highlight {
+  background-color: rgba(0, 230, 118, 0.3);
+  color: #ffffff;
+  border-bottom: 2px solid var(--brand-green);
+  font-weight: 500;
+  padding: 1px 2px;
+  border-radius: 2px;
+}

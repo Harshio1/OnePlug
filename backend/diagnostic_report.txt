@@ -1,0 +1,103 @@
+
+========================================================================
+PASSING FILES (9 files)
+========================================================================
+
+  FILE: 85d227b8-656d-4ba2-a7ec-dc88c78b5aad.mp3  (1806.4 KB)
+  codec=mp3 sr=48000 ch=2 br=128kbps dur=115.6s
+  amplitude: max=0.6501 rms=0.0745 silence=0.448
+  Whisper: lang=hi segs=44 words=224 nsp_avg=0.2719 logp_avg=-0.5021
+  Status: PASS  Root cause: ok
+  Text: Thank you for calling Mathaflores. How can I help you? Namaste. I want to order flowers. And I think you have the one I am looking for. I will be happy to keep your order in mind. Can I know your name
+
+  FILE: 6e3ec5fc-ee07-41dd-aec9-7175513f6678.ogg  (1581.5 KB)
+  codec=vorbis sr=44100 ch=2 br=160kbps dur=121.6s
+  amplitude: max=1.0 rms=0.1392 silence=0.1542
+  Whisper: lang=ta segs=33 words=269 nsp_avg=0.1467 logp_avg=-0.91
+  Status: PASS  Root cause: ok
+  Text: India India is a very important country in the world India is a very important country in the world India is a very important country in the world India is a very important country in the world India 
+
+  FILE: 51fdcb91-5252-4ddf-94ca-edbab6be004d.wav  (8904.9 KB)
+  codec=pcm_s16le sr=48000 ch=2 br=1536kbps dur=47.5s
+  amplitude: max=0.2055 rms=0.018 silence=0.6292
+  Whisper: lang=ta segs=12 words=92 nsp_avg=0.3719 logp_avg=-0.5829
+  Status: PASS  Root cause: ok
+  Text: Greetings! My name is Diana Maria. I have come here to get a job from Vijay Vada. I love to learn languages. I have learnt German in Duoling. I have spoken with my colleagues and learnt Tamil. I also 
+
+  FILE: 6af2b508-69b0-4490-8297-7aaf5e346248.mp3  (947.6 KB)
+  codec=mp3 sr=44100 ch=2 br=131kbps dur=59.2s
+  amplitude: max=1.0 rms=0.2306 silence=0.3701
+  Whisper: lang=ta segs=7 words=63 nsp_avg=0.8753 logp_avg=-1.2639
+  Status: PASS  Root cause: ok
+  Text: 1. Blood glucose is a form of blood that is not easily absorbed. 2. Water-induced people should consume low-fat milk. The The vegetables are the ones that are available in the middle class. The whole 
+
+  FILE: 94ffcfc2-ac08-4852-9591-24f124246fae.wav  (12695.4 KB)
+  codec=pcm_f32le sr=48000 ch=1 br=1536kbps dur=67.7s
+  amplitude: max=0.0639 rms=0.0061 silence=0.9154
+  Whisper: lang=en segs=10 words=82 nsp_avg=0.1331 logp_avg=-0.2394
+  Status: PASS  Root cause: ok
+  Text: Harvard List number one. The birch canoe slid on the smooth planks. Glue the sheet to the dark blue background. It's easy to tell the depth of a well. These days a chicken leg is a rare dish. Rice is 
+
+  FILE: c8e4e997-2bb7-4a06-b0c7-e2fa7fe01429.mp3  (255.6 KB)
+  codec=mp3 sr=44100 ch=2 br=128kbps dur=16.3s
+  amplitude: max=0.8235 rms=0.1729 silence=0.0968
+  Whisper: lang=en segs=2 words=23 nsp_avg=0.4171 logp_avg=-0.2901
+  Status: PASS  Root cause: ok
+  Text: Your daddy's calling you, wants to see what you're up to. If you wait till the song is through, just might miss him.
+
+  FILE: 0919c873-6574-4900-adc9-f8157201bf50.wav  (326.7 KB)
+  codec=pcm_s16le sr=22050 ch=1 br=352kbps dur=7.6s
+  amplitude: max=0.6766 rms=0.0644 silence=0.4318
+  Whisper: lang=en segs=2 words=19 nsp_avg=0.0098 logp_avg=-0.2284
+  Status: PASS  Root cause: ok
+  Text: The examination and testimony of the experts enabled the commission to conclude that five shots may have been fired.
+
+  FILE: 190f7318-454e-4678-a5ad-e39f70c80358.wav  (5168.2 KB)
+  codec=pcm_s16le sr=44100 ch=2 br=1411kbps dur=30.0s
+  amplitude: max=0.8376 rms=0.0927 silence=0.4821
+  Whisper: lang=ta segs=9 words=48 nsp_avg=0.0034 logp_avg=-0.7979
+  Status: PASS  Root cause: ok
+  Text: We didn't fall in love knowing that we were going to grow up. Small anger, possessiveness, important, ego. This is what we were divided. I shouldn't have let her go. Then, I fell in love with her. I d
+
+  FILE: aff748d5-3942-4904-bccc-ddedab5d280d.mp3  (715.5 KB)
+  codec=mp3 sr=44100 ch=2 br=116kbps dur=50.4s
+  amplitude: max=1.0 rms=0.2987 silence=0.3973
+  Whisper: lang=ta segs=7 words=78 nsp_avg=0.7769 logp_avg=-1.0692
+  Status: PASS  Root cause: ok
+  Text: India's nationality The Indian government does not have nationality The government of India and the government of Pira are also called nationality Only the nationalities are included In the nationalit
+
+========================================================================
+PARTIAL FILES (4 files)
+========================================================================
+
+  FILE: 32da681d-e151-424b-af96-854144b05d76.wav  (440.0 KB)
+  codec=pcm_s16le sr=48000 ch=1 br=768kbps dur=4.7s
+  amplitude: max=0.5259 rms=0.0581 silence=0.5565
+  Whisper: lang=ta segs=1 words=8 nsp_avg=0.0865 logp_avg=-1.0371
+  Status: PARTIAL  Root cause: short_transcript_possible_partial
+  Text: No news about other films has been published.
+
+  FILE: 152ea757-630c-40e5-92a1-a10122e908cf.wav  (688.0 KB)
+  codec=pcm_s16le sr=48000 ch=1 br=768kbps dur=7.3s
+  amplitude: max=0.5221 rms=0.0689 silence=0.4829
+  Whisper: lang=ta segs=1 words=11 nsp_avg=0.0898 logp_avg=-1.5275
+  Status: PARTIAL  Root cause: short_transcript_possible_partial
+  Text: We are in a great mood with the new business news.
+
+  FILE: bc94796d-c16f-487b-acc2-1e44c0c71cbe.wav  (456.0 KB)
+  codec=pcm_s16le sr=48000 ch=1 br=768kbps dur=4.9s
+  amplitude: max=0.5551 rms=0.0708 silence=0.5617
+  Whisper: lang=ta segs=1 words=12 nsp_avg=0.0784 logp_avg=-1.3304
+  Status: PARTIAL  Root cause: short_transcript_possible_partial
+  Text: I will give you one more thing to use as a proof
+
+  FILE: fdb5f28f-8e2c-4d5d-9e62-4deb0db47232.wav  (424.0 KB)
+  codec=pcm_s16le sr=48000 ch=1 br=768kbps dur=4.5s
+  amplitude: max=0.4236 rms=0.0666 silence=0.597
+  Whisper: lang=ta segs=1 words=5 nsp_avg=0.1715 logp_avg=-1.2122
+  Status: PARTIAL  Root cause: short_transcript_possible_partial
+  Text: Who do the farmers love?
+
+========================================================================
+FAILING FILES (0 files)
+========================================================================

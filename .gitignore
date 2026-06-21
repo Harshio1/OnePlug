@@ -1,0 +1,38 @@
+# Unrelated Projects
+Unrelated Projects/
+Uncertainty-Aware-Retinal-Diagnosis/
+
+# Node / Frontend
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/build/
+.eslintcache
+
+# Python / Backend
+backend/venv/
+backend/__pycache__/
+backend/**/*.pyc
+backend/uploads/*
+!backend/uploads/.gitkeep
+backend/model_cache/
+backend/app/model_cache/
+**/model_cache/
+.env
+.env.*
+*.env
+
+# Databases
+backend/*.db
+backend/*.sqlite
+backend/*.log
+
+# IDEs & System
+.idea/
+.vscode/
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
