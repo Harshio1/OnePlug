@@ -304,8 +304,9 @@ export default function Dashboard() {
   const fetchAudioFiles = async () => {
     if (!token) return;
     setLoadingList(true);
+    const apiBase = process.env.NEXT_PUBLIC_API_URL || `http://${window.location.hostname}:8002`;
     try {
-      const res = await fetch(`http://${window.location.hostname}:8002/api/v1/transcribe/list`, {
+      const res = await fetch(`${apiBase}/api/v1/transcribe/list`, {
         cache: "no-store",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -328,8 +329,9 @@ export default function Dashboard() {
     if (!token) return;
     setLoadingDetail(true);
     setActiveTab("viewer");
+    const apiBase = process.env.NEXT_PUBLIC_API_URL || `http://${window.location.hostname}:8002`;
     try {
-      const res = await fetch(`http://${window.location.hostname}:8002/api/v1/transcribe/file/${fileId}`, {
+      const res = await fetch(`${apiBase}/api/v1/transcribe/file/${fileId}`, {
         cache: "no-store",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -356,8 +358,9 @@ export default function Dashboard() {
       return;
     }
 
+    const apiBase = process.env.NEXT_PUBLIC_API_URL || `http://${window.location.hostname}:8002`;
     try {
-      const res = await fetch(`http://${window.location.hostname}:8002/api/v1/transcribe/delete/${fileId}`, {
+      const res = await fetch(`${apiBase}/api/v1/transcribe/delete/${fileId}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -437,8 +440,9 @@ export default function Dashboard() {
       formData.append("prompt", customPrompt);
     }
 
+    const apiBase = process.env.NEXT_PUBLIC_API_URL || `http://${window.location.hostname}:8002`;
     const xhr = new XMLHttpRequest();
-    xhr.open("POST", `http://${window.location.hostname}:8002/api/v1/transcribe/upload`, true);
+    xhr.open("POST", `${apiBase}/api/v1/transcribe/upload`, true);
     xhr.setRequestHeader("Authorization", `Bearer ${token}`);
 
     // Track upload progress
@@ -1238,7 +1242,7 @@ export default function Dashboard() {
                     <div className="flex-1 w-full max-w-lg md:mx-4">
                       <audio
                         ref={audioPlayerRef}
-                        src={`http://${window.location.hostname}:8002/api/v1/transcribe/audio/${activeAudioFile.id}`}
+                        src={`${process.env.NEXT_PUBLIC_API_URL || `http://${window.location.hostname}:8002`}/api/v1/transcribe/audio/${activeAudioFile.id}`}
                         className="w-full h-8 accent-brand-green bg-brand-bg rounded-lg"
                         controls
                         onPlay={() => setIsPlaying(true)}
