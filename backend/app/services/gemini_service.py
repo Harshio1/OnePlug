@@ -128,7 +128,9 @@ class GeminiService:
         if self.azure_api_key and self.azure_endpoint:
             import requests
             endpoint = self.azure_endpoint
-            if "/chat/completions" not in endpoint and "/responses" not in endpoint:
+            if endpoint.endswith("/responses"):
+                endpoint = endpoint[:-10] + "/chat/completions"
+            elif "/chat/completions" not in endpoint:
                 endpoint = endpoint.rstrip("/") + "/chat/completions"
             
             headers = {
@@ -146,13 +148,33 @@ class GeminiService:
                 "model": "gpt-4o"
             }
             
-            logger.info("GeminiService: Sending request to Azure AI Foundry...")
+            logger.info(f"GeminiService: Sending request to Azure AI Foundry ({endpoint})...")
             try:
                 response = requests.post(endpoint, headers=headers, json=payload, timeout=45)
+                if response.status_code == 400:
+                    # Retry without response_format if model version/endpoint rejects it
+                    logger.warning("GeminiService: Azure 400 Bad Request, retrying without response_format...")
+                    payload_retry = {
+                        "messages": [
+                            {"role": "system", "content": system_instructions},
+                            {"role": "user", "content": input_context}
+                        ],
+                        "model": "gpt-4o"
+                    }
+                    response = requests.post(endpoint, headers=headers, json=payload_retry, timeout=45)
+                
                 response.raise_for_status()
                 res_data = response.json()
                 completion_text = res_data["choices"][0]["message"]["content"]
-                data = json.loads(completion_text)
+                
+                # Strip markdown code block wrappers if any
+                completion_clean = completion_text.strip()
+                if completion_clean.startswith("```"):
+                    lines = completion_clean.splitlines()
+                    if lines[0].startswith("```json") or lines[0].startswith("```"):
+                        completion_clean = "\n".join(lines[1:-1])
+                
+                data = json.loads(completion_clean)
                 logger.info("GeminiService: Successfully received response from Azure AI Foundry.")
                 return data
             except Exception as e:
