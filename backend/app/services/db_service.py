@@ -84,10 +84,10 @@ def get_audio_file(db: Session, file_id: str) -> models.AudioFile:
 def get_audio_files(db: Session, skip: int = 0, limit: int = 1000):
     import datetime
     now = datetime.datetime.utcnow()
-    # Align to midnight of 2 days ago to include all calls on that calendar day
-    two_days_ago = datetime.datetime(now.year, now.month, now.day) - datetime.timedelta(days=2)
+    # Align to midnight of 30 days ago to include all calls on that calendar day
+    thirty_days_ago = datetime.datetime(now.year, now.month, now.day) - datetime.timedelta(days=30)
     return db.query(models.AudioFile).filter(
-        models.AudioFile.created_at >= two_days_ago
+        models.AudioFile.created_at >= thirty_days_ago
     ).order_by(models.AudioFile.created_at.desc()).offset(skip).limit(limit).all()
 
 # --- Transcript CRUD ---
