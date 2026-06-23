@@ -115,8 +115,8 @@ def main():
             except Exception as e:
                 print(f"  -> Error transcribing file: {e}")
             
-            # Wait 15 seconds to avoid Gemini rate limits during analysis
-            time.sleep(15)
+            # Wait 1 second between files
+            time.sleep(1)
 
     finally:
         db.close()

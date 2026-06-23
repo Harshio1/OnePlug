@@ -13,13 +13,17 @@ def main():
     gemini = GeminiService()
     try:
         # Find all completed audio files named "None.mp3" or containing "None"
+        from sqlalchemy import or_
+        fallback_keywords = ["None", "charging session issue", "support inquiry", "app login issue", "refund payment issue", "rfid card setup"]
+        filters = [db_service.models.AudioFile.filename.like(f"%{kw}%") for kw in fallback_keywords]
+
         files = db.query(db_service.models.AudioFile).filter(
             db_service.models.AudioFile.status == "completed",
-            db_service.models.AudioFile.filename.like("%None%")
+            or_(*filters)
         ).all()
 
         total = len(files)
-        print(f"Found {total} files that need Gemini AI analysis.")
+        print(f"Found {total} files that need Gemini/Azure AI analysis.")
 
         for idx, file in enumerate(files, 1):
             # Find the corresponding transcript
@@ -31,23 +35,22 @@ def main():
                 print(f"[{idx}/{total}] No transcript text for file {file.id}")
                 continue
 
-            print(f"[{idx}/{total}] Sending to Gemini: {file.id}...")
+            print(f"[{idx}/{total}] Sending to AI Engine: {file.id}...")
             
-            # Retry loop for rate limits
+            # Retry loop
             analysis = None
-            for attempt in range(5):
+            for attempt in range(3):
                 try:
                     analysis = gemini.process_transcript(transcript.text)
-                    # Check if it returned local fallback instead of actual Gemini
-                    if analysis and "Support call regarding" in analysis.get("summary", ""):
-                        # This means it triggered fallback. Force a sleep and retry
-                        print(f"   -> Rate limit detected. Pausing for 60 seconds (Attempt {attempt+1}/5)...")
-                        time.sleep(60)
+                    # Check if it returned local fallback
+                    if analysis and any(kw in analysis.get("summary", "") for kw in ["Support call regarding", "fallback"]):
+                        print(f"   -> Local fallback detected. Pausing for 5 seconds (Attempt {attempt+1}/3)...")
+                        time.sleep(5)
                         continue
                     break
                 except Exception as e:
-                    print(f"   -> Error on attempt {attempt+1}: {e}. Retrying in 30s...")
-                    time.sleep(30)
+                    print(f"   -> Error on attempt {attempt+1}: {e}. Retrying in 5s...")
+                    time.sleep(5)
 
             if analysis:
                 transcript.analysis = analysis
@@ -79,8 +82,8 @@ def main():
             else:
                 print("   -> Failed to get analysis after retries.")
             
-            # Wait 20 seconds between files to stay safely under rate limits
-            time.sleep(20)
+            # Wait 1 second between files (no Azure rate limits)
+            time.sleep(1)
 
     finally:
         db.close()
