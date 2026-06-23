@@ -143,8 +143,7 @@ class WhisperService:
             vad_filter=False,
             without_timestamps=False,
             word_timestamps=False,
-            condition_on_previous_text=False,
-            initial_prompt=prompt if prompt else "OnePlug EV charging. Customer feedback: cost is high, price is expensive, charger not working, app slow, payment failed, OTP, charging speed."
+            initial_prompt=prompt if prompt else "OnePlug EV charging network. Customer calls about charging stations, RFID cards, mobile app. EV car models: Tata Nexon EV, Tata Tiago EV, MG ZS EV, BYD Atto 3, Mahindra XUV400. Common complaints: payment failed, OTP delay, charger error 402, session stopped, wallet refund."
         )
 
         detected_lang = info.language
