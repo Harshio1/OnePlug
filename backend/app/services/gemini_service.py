@@ -13,13 +13,19 @@ logger = logging.getLogger(__name__)
 class GeminiService:
     def __init__(self):
         self.api_key = os.getenv("GEMINI_API_KEY")
-        if self.api_key:
+        self.azure_api_key = os.getenv("AZURE_AI_API_KEY")
+        self.azure_endpoint = os.getenv("AZURE_AI_ENDPOINT")
+        
+        if self.azure_api_key and self.azure_endpoint:
+            logger.info("GeminiService: Microsoft Foundry Azure AI configured as primary AI engine.")
+            self.model = "azure"
+        elif self.api_key:
             genai.configure(api_key=self.api_key)
-            # Use gemini-2.5-flash for fast and reliable text extraction/processing
             self.model = genai.GenerativeModel("gemini-2.5-flash")
+            logger.info("GeminiService: Gemini configured as primary AI engine.")
         else:
             self.model = None
-            logger.warning("GeminiService: GEMINI_API_KEY is missing in environment.")
+            logger.warning("GeminiService: Neither Azure AI nor Gemini credentials found.")
 
     @property
     def is_available(self) -> bool:
@@ -27,11 +33,11 @@ class GeminiService:
 
     def process_transcript(self, raw_input: Any) -> Dict[str, Any]:
         """
-        Pass the raw Whisper transcript or segments to Gemini.
+        Pass the raw Whisper transcript or segments to Azure AI Foundry or Gemini.
         Returns JSON containing the cleaned segments, English transcript, summary, issues, and sentiment.
         """
         if not self.is_available:
-            raise ValueError("GEMINI_API_KEY not configured.")
+            raise ValueError("No AI service credentials configured.")
 
         if isinstance(raw_input, list):
             # Format segments nicely to be processed
@@ -46,7 +52,7 @@ class GeminiService:
         else:
             input_context = f"Raw Transcript:\n\"\"\"\n{raw_input}\n\"\"\""
 
-        prompt = (
+        system_instructions = (
             "You are an expert AI assistant for 'OnePlug EV', an electric vehicle charging "
             "network support center in Tamil Nadu, India.\n\n"
             "Your task is to process a raw audio transcript/segments and return a clean, structured JSON analysis.\n\n"
@@ -87,7 +93,6 @@ class GeminiService:
             "- Common Indian EVs: Tata Nexon EV, Tata Tiago EV, MG ZS EV, Ather 450, Ola S1\n"
             "- Tamil Nadu locations: Chennai, Salem, Coimbatore, Madurai, Trichy, Vellore\n"
             "- App features: Profile section, Transaction History, Wallet Balance, Session History\n\n"
-            f"{input_context}\n\n"
             "Requirements:\n"
             "1. segments: If the input was a list of segments, return a cleaned list of segments where the text of each segment has been rewritten to be "
             "fluent, natural conversational English. Fix grammar, correct EV model names/codes (e.g. replace 'XCV9E' with 'MG ZS EV') and other terms correctly. "
@@ -119,35 +124,72 @@ class GeminiService:
             "}"
         )
 
-        import time
-        from google.api_core.exceptions import ResourceExhausted
-
-        max_retries = 3
-        for attempt in range(max_retries):
+        # --- Route 1: Microsoft/Azure AI Foundry ---
+        if self.azure_api_key and self.azure_endpoint:
+            import requests
+            endpoint = self.azure_endpoint
+            if "/chat/completions" not in endpoint and "/responses" not in endpoint:
+                endpoint = endpoint.rstrip("/") + "/chat/completions"
+            
+            headers = {
+                "api-key": self.azure_api_key,
+                "Authorization": f"Bearer {self.azure_api_key}",
+                "Content-Type": "application/json"
+            }
+            
+            payload = {
+                "messages": [
+                    {"role": "system", "content": system_instructions},
+                    {"role": "user", "content": input_context}
+                ],
+                "response_format": {"type": "json_object"},
+                "model": "gpt-4o"
+            }
+            
+            logger.info("GeminiService: Sending request to Azure AI Foundry...")
             try:
-                logger.info(f"GeminiService: Sending transcript to Gemini API (Attempt {attempt+1}/{max_retries})...")
-                response = self.model.generate_content(
-                    prompt,
-                    generation_config=genai.types.GenerationConfig(
-                        response_mime_type="application/json"
-                    )
-                )
-
-                # The model is forced to return JSON via response_mime_type
-                data = json.loads(response.text)
-                logger.info("GeminiService: Successfully received structured JSON from Gemini.")
+                response = requests.post(endpoint, headers=headers, json=payload, timeout=45)
+                response.raise_for_status()
+                res_data = response.json()
+                completion_text = res_data["choices"][0]["message"]["content"]
+                data = json.loads(completion_text)
+                logger.info("GeminiService: Successfully received response from Azure AI Foundry.")
                 return data
-
-            except ResourceExhausted:
-                if attempt < max_retries - 1:
-                    logger.warning("GeminiService: Rate limit hit (429). Waiting 15 seconds before retrying...")
-                    time.sleep(15)
-                else:
-                    logger.error("GeminiService: Failed to process via Gemini due to Rate Limit. Using local fallback.")
-                    return self._get_local_fallback(raw_input)
             except Exception as e:
-                logger.error(f"GeminiService: Failed to process via Gemini: {e}. Using local fallback.")
-                return self._get_local_fallback(raw_input)
+                logger.error(f"GeminiService: Azure AI Foundry failed: {e}. Falling back to Gemini or local.")
+
+        # --- Route 2: Gemini API ---
+        if self.api_key and not isinstance(self.model, str):
+            prompt_full = f"{system_instructions}\n\nInput Context:\n{input_context}"
+            import time
+            from google.api_core.exceptions import ResourceExhausted
+
+            max_retries = 3
+            for attempt in range(max_retries):
+                try:
+                    logger.info(f"GeminiService: Sending transcript to Gemini API (Attempt {attempt+1}/{max_retries})...")
+                    response = self.model.generate_content(
+                        prompt_full,
+                        generation_config=genai.types.GenerationConfig(
+                            response_mime_type="application/json"
+                        )
+                    )
+                    data = json.loads(response.text)
+                    logger.info("GeminiService: Successfully received structured JSON from Gemini.")
+                    return data
+
+                except ResourceExhausted:
+                    if attempt < max_retries - 1:
+                        logger.warning("GeminiService: Rate limit hit (429). Waiting 15 seconds before retrying...")
+                        time.sleep(15)
+                    else:
+                        logger.error("GeminiService: Failed to process via Gemini due to Rate Limit. Using local fallback.")
+                        return self._get_local_fallback(raw_input)
+                except Exception as e:
+                    logger.error(f"GeminiService: Failed to process via Gemini: {e}. Using local fallback.")
+                    return self._get_local_fallback(raw_input)
+
+        return self._get_local_fallback(raw_input)
 
     def _get_local_fallback(self, raw_input: Any) -> Dict[str, Any]:
         """
