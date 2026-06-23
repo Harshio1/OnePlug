@@ -19,29 +19,81 @@ def main():
         print(f"[{now}] Starting full 30-day historical import...")
         print(f"Fetching call logs from MyOperator since: {thirty_days_ago} UTC...")
         
-        # 1. Trigger the sync process to fetch logs and download audio files from MyOperator for 30 days
-        # We pass the start timestamp to pull the last 30 days
         start_ts = int(thirty_days_ago.timestamp())
+        to_ts = int(now.timestamp())
         
-        # Pull call logs into database (this will register the metadata in Supabase and download files to disk)
-        from app.integrations.myoperator import MyOperatorClient
-        client = MyOperatorClient()
-        logs = client.fetch_call_logs(from_ts=start_ts, limit=1000)
+        from app.integrations.myoperator import fetch_call_logs, get_recording_download_url, download_audio_file
         
-        print(f"Retrieved {len(logs)} call logs from MyOperator.")
-        
-        # Process and save them to the database
+        # Paging loop to fetch all logs in the 30-day window
+        page = 0
+        limit = 100
         synced_count = 0
-        for log in logs:
+        
+        while True:
+            offset = page * limit
+            print(f"Fetching call logs page {page} (offset {offset})...")
             try:
-                # Add to DB if not exists
-                db_file = client.save_log_to_db(db, log)
-                if db_file:
-                    synced_count += 1
+                logs_res = fetch_call_logs(start_ts, to_ts, log_from=offset, limit=limit)
             except Exception as e:
-                print(f"Error saving log: {e}")
+                print(f"Failed to fetch call logs page {page}: {e}")
+                break
                 
-        print(f"Successfully synced {synced_count} call records in database.")
+            if logs_res.get("status") != "success":
+                print(f"MyOperator logs error response: {logs_res.get('message')}")
+                break
+                
+            hits = logs_res.get("data", {}).get("hits", [])
+            if not hits:
+                print("No more call logs returned from API.")
+                break
+                
+            for hit in hits:
+                source = hit.get("_source", {})
+                filename = source.get("filename")
+                start_time = source.get("start_time")
+                caller_number = source.get("caller_number", "Unknown")
+                
+                if not filename:
+                    continue
+                    
+                # Verify if recording already exists in DB to avoid duplicate syncs
+                existing = db.query(db_service.models.AudioFile).filter(
+                    db_service.models.AudioFile.filename == filename
+                ).first()
+                if existing:
+                    continue
+                    
+                print(f"Syncing new recording: {filename} from {caller_number}")
+                
+                try:
+                    # 1. Fetch Temporary Link
+                    download_url = get_recording_download_url(filename)
+                    
+                    # 2. Download File physically
+                    local_path = download_audio_file(download_url)
+                    file_size = os.path.getsize(local_path)
+                    
+                    # 3. Save DB Record using call start time as created_at
+                    db_file = db_service.models.AudioFile(
+                        filename=filename,
+                        file_path=local_path,
+                        file_size=file_size,
+                        mime_type="audio/mpeg",
+                        status="pending",
+                        created_at=datetime.datetime.utcfromtimestamp(start_time)
+                    )
+                    db.add(db_file)
+                    db.commit()
+                    db.refresh(db_file)
+                    synced_count += 1
+                    
+                except Exception as exc:
+                    print(f"Failed to sync call log {filename}: {exc}")
+                    continue
+            
+            page += 1
+            
+        print(f"Successfully synced {synced_count} new call records in database.")
 
         # 2. Transcribe the pending calls
         # We query for all pending files from the last 30 days
