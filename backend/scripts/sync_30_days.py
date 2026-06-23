@@ -8,7 +8,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from app.db import SessionLocal
 from app.services import db_service
-from app.routers.transcription import sync_myoperator_calls, process_transcription_task
+from app.routers.transcription import process_transcription_task
 
 def main():
     db = SessionLocal()
