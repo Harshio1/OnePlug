@@ -134,8 +134,6 @@ def sync_recent_calls(db: Session, background_tasks: BackgroundTasks, transcribe
             break
             
         for hit in hits:
-            if synced_count >= 15:
-                break
             source = hit.get("_source", {})
             filename = source.get("filename")
             start_time = source.get("start_time")
@@ -187,10 +185,6 @@ def sync_recent_calls(db: Session, background_tasks: BackgroundTasks, transcribe
                 logger.error(f"Failed to sync call log {filename}: {exc}")
                 failed_count += 1
                 continue
-                
-        if synced_count >= 15:
-            logger.info("Reached safety limit of 15 synced calls. Exiting sync loop.")
-            break
             
         # Move to next page
         page += 1
