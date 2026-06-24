@@ -61,7 +61,7 @@ def fetch_call_logs(from_ts: int, to_ts: int, log_from: int = 0, limit: int = 10
     # Throttle requests to stay well within 20 requests/minute limit
     time.sleep(3.0)
     
-    response = requests.post(url, headers=headers, data=payload)
+    response = requests.post(url, headers=headers, data=payload, timeout=30)
     response.raise_for_status()
     return response.json()
 
@@ -71,7 +71,7 @@ def get_recording_download_url(filename: str) -> str:
     headers = get_auth_headers()
     
     time.sleep(3.0) # Throttling
-    response = requests.get(url, headers=headers)
+    response = requests.get(url, headers=headers, timeout=30)
     response.raise_for_status()
     
     res_data = response.json()
@@ -89,7 +89,7 @@ def download_audio_file(download_url: str) -> str:
     os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
     
     # Download in chunks
-    response = requests.get(download_url, stream=True)
+    response = requests.get(download_url, stream=True, timeout=60)
     response.raise_for_status()
     
     with open(dest_path, "wb") as f:
@@ -110,6 +110,7 @@ def sync_recent_calls(db: Session, background_tasks: BackgroundTasks, transcribe
     limit = 100
     synced_count = 0
     failed_count = 0
+    completed_listing = True
     
     while True:
         offset = page * limit
@@ -119,10 +120,12 @@ def sync_recent_calls(db: Session, background_tasks: BackgroundTasks, transcribe
             logs_res = fetch_call_logs(from_ts, to_ts, log_from=offset, limit=limit)
         except Exception as e:
             logger.error(f"Failed to fetch call logs page {page}: {e}")
+            completed_listing = False
             break
             
         if logs_res.get("status") != "success":
             logger.error(f"MyOperator logs error response: {logs_res.get('message')}")
+            completed_listing = False
             break
             
         hits = logs_res.get("data", {}).get("hits", [])
@@ -192,13 +195,18 @@ def sync_recent_calls(db: Session, background_tasks: BackgroundTasks, transcribe
         # Move to next page
         page += 1
         
-    # Save state up to the to_ts timestamp we just processed
-    save_last_sync_timestamp(to_ts)
+    # Advance the watermark only after the complete source listing was read.
+    # A failed page must be retried next run; otherwise those calls are lost.
+    if completed_listing:
+        save_last_sync_timestamp(to_ts)
+    else:
+        logger.warning("MyOperator sync did not complete; preserving the previous sync watermark.")
     
     return {
         "status": "success",
         "synced_count": synced_count,
         "failed_count": failed_count,
         "range_start": from_ts,
-        "range_end": to_ts
+        "range_end": to_ts,
+        "watermark_advanced": completed_listing
     }

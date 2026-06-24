@@ -130,6 +130,7 @@ export default function Dashboard() {
 
   // Audio Player Sync in Transcript Viewer
   const audioPlayerRef = useRef<HTMLAudioElement | null>(null);
+  const [audioStreamUrl, setAudioStreamUrl] = useState<string | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   // Helper to split a transcript segment list into alternating turns
@@ -267,8 +268,10 @@ export default function Dashboard() {
     if (!storedToken) {
       router.push("/login");
     } else {
-      setToken(storedToken);
-      setUsername(storedUsername);
+      queueMicrotask(() => {
+        setToken(storedToken);
+        setUsername(storedUsername);
+      });
     }
   }, [router]);
 
@@ -295,13 +298,19 @@ export default function Dashboard() {
     }
   }, [audioFiles, token]);
 
-  const handleLogout = () => {
+  useEffect(() => {
+    return () => {
+      if (audioStreamUrl) URL.revokeObjectURL(audioStreamUrl);
+    };
+  }, [audioStreamUrl]);
+
+  function handleLogout() {
     localStorage.removeItem("oneplug_token");
     localStorage.removeItem("oneplug_username");
     router.push("/login");
-  };
+  }
 
-  const fetchAudioFiles = async () => {
+  async function fetchAudioFiles() {
     if (!token) return;
     setLoadingList(true);
     const apiBase = process.env.NEXT_PUBLIC_API_URL || `http://${window.location.hostname}:8002`;
@@ -323,23 +332,34 @@ export default function Dashboard() {
     } finally {
       setLoadingList(false);
     }
-  };
+  }
 
   const loadTranscriptDetails = async (fileId: string) => {
     if (!token) return;
     setLoadingDetail(true);
     setActiveTab("viewer");
+    if (audioStreamUrl) {
+      URL.revokeObjectURL(audioStreamUrl);
+      setAudioStreamUrl(null);
+    }
     const apiBase = process.env.NEXT_PUBLIC_API_URL || `http://${window.location.hostname}:8002`;
     try {
-      const res = await fetch(`${apiBase}/api/v1/transcribe/file/${fileId}`, {
-        cache: "no-store",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const headers = { Authorization: `Bearer ${token}` };
+      const [res, audioResponse] = await Promise.all([
+        fetch(`${apiBase}/api/v1/transcribe/file/${fileId}`, {
+          cache: "no-store",
+          headers,
+        }),
+        fetch(`${apiBase}/api/v1/transcribe/audio/${fileId}`, { headers }),
+      ]);
       if (res.ok) {
         const data = await res.json();
         setActiveAudioFile(data);
+        if (audioResponse.ok) {
+          setAudioStreamUrl(URL.createObjectURL(await audioResponse.blob()));
+        } else {
+          setAudioStreamUrl(null);
+        }
         // Clear search queries
         setTranscriptSearchQuery("");
       }
@@ -451,7 +471,7 @@ export default function Dashboard() {
         const percent = Math.round((event.loaded / event.total) * 100);
         setUploadProgress(percent);
         if (percent === 100) {
-          setUploadStage("File uploaded. Initiating OpenAI Whisper speech-to-text...");
+          setUploadStage("File uploaded. Initiating speech-to-text...");
         }
       }
     };
@@ -552,7 +572,7 @@ export default function Dashboard() {
   };
 
   // Classification helper for files
-  const getCallCategory = (file: any) => {
+  const getCallCategory = (file: AudioFile) => {
     const text = (file.transcript?.text || "").toLowerCase();
     const summary = (file.transcript?.analysis?.summary || "").toLowerCase();
     const concern = (file.transcript?.analysis?.main_concern || "").toLowerCase();
@@ -891,7 +911,7 @@ export default function Dashboard() {
                       <FileAudio className="h-14 w-14 text-brand-border mx-auto mb-4" />
                       <p className="text-base font-semibold text-brand-text-muted">No Ingested Calls Found</p>
                       <p className="text-xs text-brand-text-muted mt-1 max-w-sm mx-auto">
-                        There are no calls matching your filter. Upload call audio in the 'Upload Customer Call' page to get started.
+                        There are no calls matching your filter. Upload call audio in the &apos;Upload Customer Call&apos; page to get started.
                       </p>
                     </div>
                   ) : (
@@ -1242,7 +1262,7 @@ export default function Dashboard() {
                     <div className="flex-1 w-full max-w-lg md:mx-4">
                       <audio
                         ref={audioPlayerRef}
-                        src={`${process.env.NEXT_PUBLIC_API_URL || `http://${window.location.hostname}:8002`}/api/v1/transcribe/audio/${activeAudioFile.id}`}
+                        src={audioStreamUrl || undefined}
                         className="w-full h-8 accent-brand-green bg-brand-bg rounded-lg"
                         controls
                         onPlay={() => setIsPlaying(true)}

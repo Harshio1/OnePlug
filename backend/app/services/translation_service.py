@@ -29,6 +29,7 @@ class TranslationService:
     """
 
     def __init__(self):
+        self._translator = None
         self._available = False
         self._init()
 

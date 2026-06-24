@@ -24,6 +24,20 @@ analysis_service = AnalysisService()
 translation_service = TranslationService()
 gemini_service = GeminiService()
 
+PRIVILEGED_ROLES = {"admin", "manager"}
+
+def can_access_audio(audio_file: models.AudioFile, user: models.User) -> bool:
+    return user.role in PRIVILEGED_ROLES or audio_file.uploaded_by_id == user.id
+
+def get_authorized_audio(db: Session, file_id: str, user: models.User) -> models.AudioFile:
+    db_file = db_service.get_audio_file(db, file_id)
+    if not db_file:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Audio transcript not found.")
+    if not can_access_audio(db_file, user):
+        # Do not disclose whether another employee's call exists.
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Audio transcript not found.")
+    return db_file
+
 def process_transcription_task(file_id: str, language_hint: str = None, prompt: str = None):
     """
     Background worker that runs the OpenAI Whisper transcription
@@ -163,7 +177,10 @@ def upload_audio(
     # Ensure upload directory exists
     os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
     
-    # Save physical file to disk
+    if file.content_type and not file.content_type.startswith("audio/"):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Uploaded content must be an audio file.")
+
+    # Save physical file to disk with a server-generated name and a bounded size.
     import uuid
     file_uuid = str(uuid.uuid4())
     secure_filename = f"{file_uuid}{file_ext}"
@@ -173,11 +190,19 @@ def upload_audio(
     file_size = 0
     try:
         with open(dest_path, "wb") as buffer:
-            shutil.copyfileobj(file.file, buffer)
-        file_size = os.path.getsize(dest_path)
+            while chunk := file.file.read(1024 * 1024):
+                file_size += len(chunk)
+                if file_size > settings.max_upload_size_bytes:
+                    raise HTTPException(
+                        status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+                        detail=f"Audio exceeds the {settings.MAX_UPLOAD_SIZE_MB} MB upload limit."
+                    )
+                buffer.write(chunk)
     except Exception as e:
         if os.path.exists(dest_path):
             os.remove(dest_path)
+        if isinstance(e, HTTPException):
+            raise e
         logger.error(f"Failed to write uploaded file to disk: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -216,14 +241,16 @@ def upload_audio(
 @router.get("/list", response_model=List[schemas.AudioFileResponse])
 def list_audios(
     skip: int = 0,
-    limit: int = 1000,
+    limit: int = 100,
     current_user: models.User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """
     Fetch a list of all audio files and their current transcription states.
     """
-    return db_service.get_audio_files(db, skip=skip, limit=limit)
+    limit = min(limit, 100)
+    owner_id = None if current_user.role in PRIVILEGED_ROLES else current_user.id
+    return db_service.get_audio_files(db, skip=skip, limit=limit, uploaded_by_id=owner_id)
 
 @router.get("/file/{file_id}", response_model=schemas.AudioFileResponse)
 def get_audio_detail(
@@ -234,13 +261,7 @@ def get_audio_detail(
     """
     Retrieve single audio metadata and associated transcript contents.
     """
-    db_file = db_service.get_audio_file(db, file_id)
-    if not db_file:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Requested audio transcript not found."
-        )
-    return db_file
+    return get_authorized_audio(db, file_id, current_user)
 
 @router.delete("/delete/{file_id}", status_code=status.HTTP_200_OK)
 def delete_audio(
@@ -251,12 +272,7 @@ def delete_audio(
     """
     Delete an audio upload, its local file representation, and associated transcripts.
     """
-    db_file = db_service.get_audio_file(db, file_id)
-    if not db_file:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Audio transcript not found."
-        )
+    db_file = get_authorized_audio(db, file_id, current_user)
         
     # Delete physically
     if os.path.exists(db_file.file_path):
@@ -276,17 +292,13 @@ from fastapi.responses import FileResponse
 @router.get("/audio/{file_id}")
 def stream_audio(
     file_id: str,
+    current_user: models.User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """
     Streams the physical audio recording file for browser playback.
     """
-    db_file = db_service.get_audio_file(db, file_id)
-    if not db_file:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Audio file metadata not found."
-        )
+    db_file = get_authorized_audio(db, file_id, current_user)
     if not os.path.exists(db_file.file_path):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -332,4 +344,3 @@ def trigger_myoperator_sync(
         
     background_tasks.add_task(run_sync_in_background, process_transcription_task)
     return {"status": "success", "message": "MyOperator sync started in the background."}
-

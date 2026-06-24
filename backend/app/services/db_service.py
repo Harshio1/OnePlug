@@ -81,14 +81,15 @@ def update_audio_file_status(
 def get_audio_file(db: Session, file_id: str) -> models.AudioFile:
     return db.query(models.AudioFile).filter(models.AudioFile.id == file_id).first()
 
-def get_audio_files(db: Session, skip: int = 0, limit: int = 1000):
+def get_audio_files(db: Session, skip: int = 0, limit: int = 100, uploaded_by_id: int = None):
     import datetime
     now = datetime.datetime.utcnow()
     # Align to midnight of 30 days ago to include all calls on that calendar day
     thirty_days_ago = datetime.datetime(now.year, now.month, now.day) - datetime.timedelta(days=30)
-    return db.query(models.AudioFile).filter(
-        models.AudioFile.created_at >= thirty_days_ago
-    ).order_by(models.AudioFile.created_at.desc()).offset(skip).limit(limit).all()
+    query = db.query(models.AudioFile).filter(models.AudioFile.created_at >= thirty_days_ago)
+    if uploaded_by_id is not None:
+        query = query.filter(models.AudioFile.uploaded_by_id == uploaded_by_id)
+    return query.order_by(models.AudioFile.created_at.desc()).offset(skip).limit(limit).all()
 
 # --- Transcript CRUD ---
 def create_transcript(
@@ -128,31 +129,9 @@ def create_transcript(
         db_file.status = "completed"
         db_file.duration = duration
         
-        # Rename filename to a short 2-3 word summary of the main concern if present
-        if analysis:
-            desc_text = analysis.get("main_concern") or analysis.get("summary")
-            if desc_text:
-                # Clean generic customer/caller prefixes
-                import re
-                desc_clean = desc_text.strip()
-                pattern = re.compile(
-                    r'^(the\s+)?(customer|caller|user)\s+(experienced|finds|is\s+experiencing|reports|reported|called\s+(to|reporting|about)?|wants\s+to|is|has|complained\s+about|complains\s+about|feels|stated|states)\s+',
-                    re.IGNORECASE
-                )
-                while True:
-                    new_desc = pattern.sub('', desc_clean)
-                    if new_desc == desc_clean:
-                        break
-                    desc_clean = new_desc.strip()
-                
-                desc_clean = re.sub(r'^(that|about|to|with|for|on|a|an|the)\s+', '', desc_clean, flags=re.IGNORECASE).strip()
-                
-                # Remove punctuation and split into words
-                words = [w.strip(".,?!();:\"'") for w in desc_clean.split() if w.strip()]
-                short_desc = " ".join(words[:3]) # Take first 3 words
-                if short_desc:
-                    ext = os.path.splitext(db_file.filename)[1] or ".mp3"
-                    db_file.filename = f"{short_desc}{ext}"
+        # Preserve the upstream filename. MyOperator uses it as the durable
+        # external identifier for idempotent syncs; presentation labels belong
+        # in a separate field, not in the source identifier.
 
     db.commit()
     db.refresh(db_transcript)

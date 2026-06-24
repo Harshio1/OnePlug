@@ -51,8 +51,8 @@ export default function LoginPage() {
       localStorage.setItem("oneplug_token", data.access_token);
       localStorage.setItem("oneplug_username", username);
       router.push("/");
-    } catch (err: any) {
-      setError(err.message || "Failed to connect to the backend server.");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Failed to connect to the backend server.");
     } finally {
       setLoading(false);
     }
@@ -162,25 +162,6 @@ export default function LoginPage() {
             </button>
           </form>
 
-          {/* Seed User Helper Box */}
-          <div className="mt-8 rounded-xl bg-brand-bg/50 border border-brand-border p-4">
-            <h4 className="text-xs font-semibold text-brand-green uppercase tracking-wider mb-2 flex items-center gap-1.5">
-              Demo Access Credentials
-            </h4>
-            <p className="text-xs text-brand-text-muted mb-3">
-              This application has been pre-seeded with a default secure administrator account for immediate testing:
-            </p>
-            <div className="grid grid-cols-2 gap-2 text-xs font-mono bg-brand-card/80 p-2.5 rounded-lg border border-brand-border/60">
-              <div>
-                <span className="text-brand-text-muted">Username:</span>{" "}
-                <code className="text-white bg-brand-bg px-1 py-0.5 rounded border border-brand-border">admin</code>
-              </div>
-              <div>
-                <span className="text-brand-text-muted">Password:</span>{" "}
-                <code className="text-white bg-brand-bg px-1 py-0.5 rounded border border-brand-border">oneplug2026</code>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </div>
