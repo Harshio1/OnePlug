@@ -600,10 +600,12 @@ export default function Dashboard() {
     }
     
     // 2. Support Issues Check
-    const hasTechnicalIssue = ["failed", "error", "402", "stuck", "refund", "not starting", "slow", "stopped", "deducted", "unplug", "plugged", "scan", "qr", "signal", "offline", "unable", "not taking", "login", "otp", "crash", "bug"].some(kw => text.includes(kw) || concern.includes(kw) || summary.includes(kw));
-    const hasPricingComplaint = ["cost", "price", "rate", "tariff", "charge", "pricing", "eb"].some(kw => text.includes(kw) || concern.includes(kw) || summary.includes(kw)) && 
-                                ["high", "expensive", "increase", "more", "costly", "heavy", "too"].some(kw => text.includes(kw) || concern.includes(kw) || summary.includes(kw));
-    const hasDbFlag = file.status === "failed" || file.error_message || file.transcript?.analysis?.issue_detected || issues.length > 0;
+    const hasChargingIssue = ["not charging", "no charging", "charger not working", "charger not", "not working", "disconnected", "session ended early", "session cut", "session stopped", "power cut", "402", "error", "failed", "stuck", "not starting", "slow charging", "signal", "offline", "unplug", "plugged in but"].some(kw => text.includes(kw) || concern.includes(kw) || summary.includes(kw));
+    const hasPaymentIssue = ["money deducted", "deducted", "refund", "not refunded", "double charge", "charged twice", "payment failed", "wallet", "transaction failed", "money not", "amount deducted"].some(kw => text.includes(kw) || concern.includes(kw) || summary.includes(kw));
+    const hasAppBug = ["app crash", "crashing", "app not opening", "otp not", "otp not coming", "login failed", "cannot login", "app bug", "app error", "not loading", "stuck on", "black screen", "rfid not", "rfid card not", "card not working"].some(kw => text.includes(kw) || concern.includes(kw) || summary.includes(kw));
+    const hasPricingComplaint = ["cost", "price", "rate", "tariff", "pricing", "eb rate"].some(kw => text.includes(kw) || concern.includes(kw) || summary.includes(kw)) && ["high", "expensive", "increase", "costly", "too much", "heavy"].some(kw => text.includes(kw) || concern.includes(kw) || summary.includes(kw));
+    const hasDbFlag = file.status === "failed" || file.error_message;
+    const hasTechnicalIssue = hasChargingIssue || hasPaymentIssue || hasAppBug;
     
     if (hasDbFlag || hasTechnicalIssue || hasPricingComplaint) {
       let sub = "Hardware & Charging";
