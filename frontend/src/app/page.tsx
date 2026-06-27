@@ -1251,7 +1251,7 @@ export default function Dashboard() {
                     {/* Left: Filename & Duration */}
                     <div className="flex flex-col md:flex-row items-baseline gap-2 md:gap-4 w-full md:w-auto shrink-0">
                       <h3 className="font-bold text-white text-base truncate max-w-xs md:max-w-md">
-                        {(() => { const dateKey = new Date(activeAudioFile.created_at).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }); const dayFiles = [...(groupedFilesByDate[dateKey] || [])].sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()); const idx = dayFiles.findIndex(f => f.id === activeAudioFile.id); return `Call ${dayFiles.length - idx}`; })()}
+                        {(() => { const dateKey = new Date(activeAudioFile.created_at).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }); const dayFiles = [...(groupedFilesByDate[dateKey] || [])].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()); const idx = dayFiles.findIndex(f => f.id === activeAudioFile.id); return `Call ${idx + 1}`; })()}
                       </h3>
                       <span className="text-sm text-brand-text-muted font-mono whitespace-nowrap">
                         Duration: <span className="text-white font-semibold">{formatTime(activeAudioFile.duration || 0)}</span>
