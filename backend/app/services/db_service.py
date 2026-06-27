@@ -81,7 +81,7 @@ def update_audio_file_status(
 def get_audio_file(db: Session, file_id: str) -> models.AudioFile:
     return db.query(models.AudioFile).filter(models.AudioFile.id == file_id).first()
 
-def get_audio_files(db: Session, skip: int = 0, limit: int = 100, uploaded_by_id: int = None):
+def get_audio_files(db: Session, skip: int = 0, limit: int = 1000, uploaded_by_id: int = None):
     import datetime
     now = datetime.datetime.utcnow()
     # Align to midnight of 30 days ago to include all calls on that calendar day

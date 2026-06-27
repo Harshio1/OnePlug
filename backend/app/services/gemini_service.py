@@ -96,9 +96,10 @@ class GeminiService:
             "Requirements:\n"
             "1. segments: If the input was a list of segments, return a cleaned list of segments where the text of each segment has been rewritten to be "
             "fluent, natural conversational English. Fix grammar, correct EV model names/codes (e.g. replace 'XCV9E' with 'MG ZS EV') and other terms correctly. "
-            "CRITICAL: Aggressively filter out conversational noise, audio troubleshooting phrases (e.g., 'Hello?', 'sir can you hear me', "
-            "'can you hear me now', 'Sir, I can't hear you', 'yes, tell me', 'okay okay'), repetitive filler words (like 'yes yes yes yes sir'), hold-music IVR messages, "
-            "and excessive politeness tokens. If a segment becomes completely empty or contains only noise/hold IVR messages, delete that segment entirely from the list.\n"
+            "Filter out ONLY: hold-music IVR messages (e.g. 'The person you are speaking to has put your call on hold. Please stay on.'), "
+            "and exact repeated consecutive duplicates of the same sentence (e.g. 'Sir it is in preparing' repeated 200 times — keep only one). "
+            "DO NOT delete real conversation segments even if they are short, simple, or contain filler words like 'okay', 'yes', 'hello'. "
+            "Keep ALL actual spoken dialogue between agent and customer, no matter how short.\n"
             "2. transcript: Rewrite the raw transcript into fluent, natural conversational English matching the cleaned segments.\n"
             "3. summary: A concise 1-2 sentence summary of the support call in English.\n"
             "4. main_concern: The primary issue the customer called about (in English).\n"
@@ -131,7 +132,7 @@ class GeminiService:
             if endpoint.endswith("/responses"):
                 endpoint = endpoint[:-10] + "/chat/completions"
             elif "/chat/completions" not in endpoint:
-                endpoint = endpoint.rstrip("/") + "/chat/completions"
+                endpoint = endpoint.rstrip("/") + "/openai/deployments/gpt-4o/chat/completions?api-version=2024-12-01-preview"
             
             headers = {
                 "api-key": self.azure_api_key,

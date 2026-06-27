@@ -241,14 +241,14 @@ def upload_audio(
 @router.get("/list", response_model=List[schemas.AudioFileResponse])
 def list_audios(
     skip: int = 0,
-    limit: int = 100,
+    limit: int = 2000,
     current_user: models.User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """
     Fetch a list of all audio files and their current transcription states.
     """
-    limit = min(limit, 100)
+    limit = min(limit, 5000)
     owner_id = None if current_user.role in PRIVILEGED_ROLES else current_user.id
     return db_service.get_audio_files(db, skip=skip, limit=limit, uploaded_by_id=owner_id)
 

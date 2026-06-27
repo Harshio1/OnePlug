@@ -136,14 +136,15 @@ class WhisperService:
         segments_iter, info = self.model.transcribe(
             file_path,
             task="translate",
-            language=language_hint if language_hint else None,  # None = auto-detect
+            language=None,  # None = auto-detect
             beam_size=5,
             best_of=5,
             temperature=0,
+            condition_on_previous_text=False,
+            no_speech_threshold=0.6,
             vad_filter=False,
             without_timestamps=False,
             word_timestamps=False,
-            initial_prompt=prompt if prompt else "OnePlug EV charging network. Customer calls about charging stations, RFID cards, mobile app. EV car models: Tata Nexon EV, Tata Tiago EV, MG ZS EV, BYD Atto 3, Mahindra XUV400. Common complaints: payment failed, OTP delay, charger error 402, session stopped, wallet refund."
         )
 
         detected_lang = info.language
@@ -169,6 +170,25 @@ class WhisperService:
                 full_text_parts.append(seg.text.strip())
 
         elapsed   = round(time.time() - t0, 2)
+        # Filter out hallucinated repetition segments
+        filtered_segments = []
+        seen_texts = {}
+        for seg in segments:
+            text = seg["text"].strip().lower()
+            # Skip if exact same segment text appeared more than 3 times
+            seen_texts[text] = seen_texts.get(text, 0) + 1
+            if seen_texts[text] > 3:
+                continue
+            # Skip if segment has very few unique words (e.g. "Okay Okay Okay")
+            words = text.split()
+            if len(words) >= 4:
+                unique_ratio = len(set(words)) / len(words)
+                if unique_ratio < 0.3:  # Less than 30% unique words = hallucination
+                    continue
+            filtered_segments.append(seg)
+        segments = filtered_segments
+        full_text_parts = [s["text"] for s in segments if s["text"].strip()]
+
         full_text = " ".join(full_text_parts)
         word_count = len(full_text.split())
 
