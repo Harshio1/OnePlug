@@ -824,7 +824,7 @@ export default function Dashboard() {
               </div>
 
               {/* Sub-category Pill Selector */}
-              {selectedCategory !== "All Categories" && (selectedCategory === "Support Issues" || selectedCategory === "General & Noise") && (
+              {selectedCategory !== "All Categories" && selectedCategory === "General & Noise" && (
                 <div className="flex flex-wrap items-center gap-2 pt-1 animate-fadeIn">
                   <span className="text-[10px] uppercase font-bold text-brand-text-muted tracking-wider mr-1">Subcategory:</span>
                   {(() => {

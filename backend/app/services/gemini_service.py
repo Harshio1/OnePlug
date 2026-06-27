@@ -102,7 +102,7 @@ class GeminiService:
             "Keep ALL actual spoken dialogue between agent and customer, no matter how short.\n"
             "2. transcript: Rewrite the raw transcript into fluent, natural conversational English matching the cleaned segments.\n"
             "3. summary: A concise 1-2 sentence summary of the support call in English.\n"
-            "4. main_concern: The primary issue the customer called about (in English).\n"
+            "4. main_concern: The primary issue discussed in the call. If this is an OUTBOUND call made by the AGENT to the customer, describe what the AGENT called about, not what the customer complained about. Always identify WHO raised the concern.\n"
             "5. outcome: The outcome of the interaction (in English), or 'Not applicable' if not a call.\n"
             "6. action_needed: Specific action needed to resolve the concern (in English), or 'None' if resolved.\n"
             "7. what_happened: A clear, objective, and detailed paragraph in plain English written strictly in the third person explaining exactly what happened during this call chronologically (e.g. 'A customer called from the Avinashi charging station reporting a 402 server stop error...'). Do not use first-person pronouns like 'I' or 'we'.\n"
