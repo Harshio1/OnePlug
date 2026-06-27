@@ -971,7 +971,7 @@ export default function Dashboard() {
                                                 file.status === "completed" ? "text-brand-green" : "text-brand-text-muted"
                                               }`} />
                                               <div className="truncate flex flex-col">
-                                                <span className="truncate">Call {fileIndex + 1}</span>
+                                                <span className="truncate">Call {sortedFiles.length - fileIndex}</span>
                                                 {file.status === "completed" && (
                                                   <span className="text-[10px] text-brand-text-muted font-normal mt-0.5 flex items-center gap-1.5 bg-brand-bg/50 px-2 py-0.5 rounded border border-brand-border/30 w-fit">
                                                     <span>{getCallCategory(file).icon}</span>
@@ -1251,7 +1251,7 @@ export default function Dashboard() {
                     {/* Left: Filename & Duration */}
                     <div className="flex flex-col md:flex-row items-baseline gap-2 md:gap-4 w-full md:w-auto shrink-0">
                       <h3 className="font-bold text-white text-base truncate max-w-xs md:max-w-md">
-                        {(() => { const dateKey = new Date(activeAudioFile.created_at).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }); const dayFiles = [...(groupedFilesByDate[dateKey] || [])].sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()); const idx = dayFiles.findIndex(f => f.id === activeAudioFile.id); return `Call ${idx + 1}`; })()}
+                        {(() => { const dateKey = new Date(activeAudioFile.created_at).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }); const dayFiles = [...(groupedFilesByDate[dateKey] || [])].sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()); const idx = dayFiles.findIndex(f => f.id === activeAudioFile.id); return `Call ${dayFiles.length - idx}`; })()}
                       </h3>
                       <span className="text-sm text-brand-text-muted font-mono whitespace-nowrap">
                         Duration: <span className="text-white font-semibold">{formatTime(activeAudioFile.duration || 0)}</span>

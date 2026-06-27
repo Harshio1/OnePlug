@@ -111,6 +111,10 @@ def create_transcript(
         f"words={words_count} | segments={segment_count} | "
         f"translated={'yes' if translated_text else 'no'}"
     )
+    existing = db.query(models.Transcript).filter(models.Transcript.audio_file_id == audio_file_id).first()
+    if existing:
+        logger.info(f"Transcript already exists for audio_id={audio_file_id}, skipping.")
+        return existing
     db_transcript = models.Transcript(
         audio_file_id=audio_file_id,
         text=text,
