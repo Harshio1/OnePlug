@@ -829,9 +829,7 @@ export default function Dashboard() {
                   <span className="text-[10px] uppercase font-bold text-brand-text-muted tracking-wider mr-1">Subcategory:</span>
                   {(() => {
                     let subs: string[] = [];
-                    if (selectedCategory === "Support Issues") {
-                      subs = ["Payment & Billing", "Pricing & Tariffs", "Hardware & Charging", "App & Login"];
-                    } else if (selectedCategory === "General & Noise") {
+                    if (selectedCategory === "General & Noise") {
                       subs = ["General Inquiries", "Junk / Hang-ups"];
                     }
                     return (
