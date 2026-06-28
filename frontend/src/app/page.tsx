@@ -972,12 +972,7 @@ export default function Dashboard() {
                                               }`} />
                                               <div className="truncate flex flex-col">
                                                 <span className="truncate">Call {sortedFiles.length - fileIndex}</span>
-                                                {file.status === "completed" && (
-                                                  <span className="text-[10px] text-brand-text-muted font-normal mt-0.5 flex items-center gap-1.5 bg-brand-bg/50 px-2 py-0.5 rounded border border-brand-border/30 w-fit">
-                                                    <span>{getCallCategory(file).icon}</span>
-                                                    <span>{getCallCategory(file).subcategory}</span>
-                                                  </span>
-                                                )}
+
                                               </div>
                                             </div>
                                           </td>
