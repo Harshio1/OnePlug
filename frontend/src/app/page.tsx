@@ -1271,16 +1271,40 @@ export default function Dashboard() {
                       />
                     </div>
 
-                    {/* Right: Compact Download Options */}
-                    <div className="flex items-center gap-2 shrink-0">
-                      <span className="text-sm text-brand-text-muted font-semibold uppercase tracking-wider">Download:</span>
-                      <div className="flex gap-1.5">
+                    {/* Right: Speed + Download Options */}
+                    <div className="flex items-center gap-4 shrink-0 flex-wrap">
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-xs text-brand-text-muted font-semibold uppercase tracking-wider">Speed:</span>
+                        {[1, 1.25, 1.5, 1.75, 2].map(speed => (
+                          <button
+                            key={speed}
+                            onClick={() => {
+                              setPlaybackSpeed(speed);
+                              if (audioPlayerRef.current) audioPlayerRef.current.playbackRate = speed;
+                            }}
+                            className={`px-2 py-1 rounded text-xs font-semibold transition cursor-pointer ${playbackSpeed === speed ? "bg-brand-green text-brand-bg" : "bg-brand-card text-brand-text-muted hover:text-white border border-brand-border"}`}
+                          >
+                            {speed}x
+                          </button>
+                        ))}
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-xs text-brand-text-muted font-semibold uppercase tracking-wider">Download:</span>
                         <button
                           onClick={downloadText}
                           className="text-xs bg-brand-bg hover:bg-brand-border hover:text-brand-green text-white border border-brand-border px-3 py-1.5 rounded font-semibold transition cursor-pointer"
                         >
                           TXT
                         </button>
+                        {audioStreamUrl && (
+                          
+                            href={audioStreamUrl}
+                            download={activeAudioFile.filename}
+                            className="text-xs bg-brand-bg hover:bg-brand-border hover:text-brand-green text-white border border-brand-border px-3 py-1.5 rounded font-semibold transition cursor-pointer"
+                          >
+                            MP3
+                          </a>
+                        )}
                       </div>
                     </div>
                   </div>
