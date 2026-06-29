@@ -130,6 +130,7 @@ export default function Dashboard() {
 
   // Audio Player Sync in Transcript Viewer
   const audioPlayerRef = useRef<HTMLAudioElement | null>(null);
+  const [playbackSpeed, setPlaybackSpeed] = React.useState(1);
   const [audioStreamUrl, setAudioStreamUrl] = useState<string | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
