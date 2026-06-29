@@ -1299,7 +1299,7 @@ export default function Dashboard() {
                         {audioStreamUrl && (
                           
                             href={audioStreamUrl}
-                            download={activeAudioFile.filename}
+                            download
                             className="text-xs bg-brand-bg hover:bg-brand-border hover:text-brand-green text-white border border-brand-border px-3 py-1.5 rounded font-semibold transition cursor-pointer"
                           >
                             MP3
