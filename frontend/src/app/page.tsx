@@ -1298,6 +1298,7 @@ export default function Dashboard() {
                         </button>
                         {audioStreamUrl && (
                           
+                          <a
                             href={audioStreamUrl}
                             download
                             className="text-xs bg-brand-bg hover:bg-brand-border hover:text-brand-green text-white border border-brand-border px-3 py-1.5 rounded font-semibold transition cursor-pointer"
