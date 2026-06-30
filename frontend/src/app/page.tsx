@@ -1448,9 +1448,9 @@ export default function Dashboard() {
                                   <div className="rounded-lg bg-amber-400/10 border border-amber-400/30 p-4 space-y-2">
                                     <p className="text-sm font-bold text-amber-400 uppercase tracking-wider">Issue Flagged</p>
                                     <p className="text-base sm:text-lg text-white font-bold">{a.issue_type}</p>
-                                    {a.all_issues.length > 1 && (
+                                    {a.issues.length > 1 && (
                                       <div className="flex flex-wrap gap-1 mt-1">
-                                        {a.all_issues.slice(1).map((iss, idx) => (
+                                        {a.issues.slice(1).map((iss, idx) => (
                                           <span key={idx} className="text-xs text-brand-text-muted bg-brand-border/40 rounded px-1.5 py-0.5">
                                             +{iss.issue_type}
                                           </span>
