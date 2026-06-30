@@ -36,3 +36,4 @@ backend/*.log
 *.njsproj
 *.sln
 *.swp
+backend/oneplug_backup.sql

@@ -595,7 +595,7 @@ export default function Dashboard() {
     }
 
     // 2. Partnership Enquiries Check
-    const franchiseKeywords = ["franchise", "enquiry", "branch", "invest", "dealer", "partner", "placement", "space for", "rent my land", "land offering", "site selection", "install charger"];
+    const franchiseKeywords = ["franchise", "franchisee", "dealership", "investment opportunity", "become a dealer", "want to partner", "business partnership", "placement", "space for", "rent my land", "land offering", "site selection", "set up a charging station", "open an ev dealership", "charging station installation"];
     if (franchiseKeywords.some(kw => text.includes(kw) || summary.includes(kw) || concern.includes(kw))) {
       return { category: "Partnership Enquiries", subcategory: "", icon: "" };
     }
