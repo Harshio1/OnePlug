@@ -46,7 +46,7 @@ interface AnalysisResult {
   issue_detected: boolean;
   issue_type: string | null;
   severity: string | null;
-  issues: { issue_type: string; severity: string }[];
+  all_issues: { issue_type: string; severity: string }[];
   sentiment: "Positive" | "Neutral" | "Negative";
   sentiment_score: number;
   analysed: boolean;
@@ -574,11 +574,11 @@ export default function Dashboard() {
 
   // Classification helper for files
   const getCallCategory = (file: AudioFile) => {
-    const text = (file.transcript?.text || "").toLowerCase();
+    const text = ((file.transcript?.text || "") + " " + (file.transcript?.analysis?.what_happened || "")).toLowerCase();
     const summary = (file.transcript?.analysis?.summary || "").toLowerCase();
     const concern = (file.transcript?.analysis?.main_concern || "").toLowerCase();
     const sentiment = file.transcript?.analysis?.sentiment || "Neutral";
-    const issues = file.transcript?.analysis?.issues || [];
+    const issues = file.transcript?.analysis?.all_issues || [];
     
     // 1. Junk / Hang-ups Check (Evaluated first to bypass support keyword matches)
     const cleanText = text.trim();
@@ -1448,9 +1448,9 @@ export default function Dashboard() {
                                   <div className="rounded-lg bg-amber-400/10 border border-amber-400/30 p-4 space-y-2">
                                     <p className="text-sm font-bold text-amber-400 uppercase tracking-wider">Issue Flagged</p>
                                     <p className="text-base sm:text-lg text-white font-bold">{a.issue_type}</p>
-                                    {a.issues.length > 1 && (
+                                    {a.all_issues.length > 1 && (
                                       <div className="flex flex-wrap gap-1 mt-1">
-                                        {a.issues.slice(1).map((iss, idx) => (
+                                        {a.all_issues.slice(1).map((iss, idx) => (
                                           <span key={idx} className="text-xs text-brand-text-muted bg-brand-border/40 rounded px-1.5 py-0.5">
                                             +{iss.issue_type}
                                           </span>
