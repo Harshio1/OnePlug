@@ -80,14 +80,30 @@ class AudioFileResponse(BaseModel):
     class Config:
         from_attributes = True
 
+class TranscriptListResponse(BaseModel):
+    id: str
+    audio_file_id: str
+    language: Optional[str] = None
+    words_count: int
+    duration: float
+    analysis: Optional[Dict[str, Any]] = None
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
 class AudioFileListResponse(BaseModel):
     id: str
     filename: str
     file_size: int
     duration: Optional[float] = None
+    mime_type: str
     status: str
+    error_message: Optional[str] = None
+    uploaded_by_id: Optional[int] = None
     created_at: datetime
-    language: Optional[str] = None
+    transcript: Optional[TranscriptListResponse] = None
 
     class Config:
         from_attributes = True

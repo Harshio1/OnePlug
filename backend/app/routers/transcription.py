@@ -238,7 +238,7 @@ def upload_audio(
             detail="Database register failure. File rolled back."
         )
 
-@router.get("/list", response_model=List[schemas.AudioFileResponse])
+@router.get("/list", response_model=List[schemas.AudioFileListResponse])
 def list_audios(
     skip: int = 0,
     limit: int = 2000,
