@@ -578,7 +578,7 @@ export default function Dashboard() {
     const summary = (file.transcript?.analysis?.summary || "").toLowerCase();
     const concern = (file.transcript?.analysis?.main_concern || "").toLowerCase();
     const sentiment = file.transcript?.analysis?.sentiment || "Neutral";
-    const issues = file.transcript?.analysis?.all_issues || [];
+    const issues = file.transcript?.analysis?.issues || [];
     
     // 1. Junk / Hang-ups Check (Evaluated first to bypass support keyword matches)
     const cleanText = text.trim();
