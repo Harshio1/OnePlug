@@ -46,7 +46,7 @@ interface AnalysisResult {
   issue_detected: boolean;
   issue_type: string | null;
   severity: string | null;
-  all_issues: { issue_type: string; severity: string }[];
+  issues: { issue_type: string; severity: string }[];
   sentiment: "Positive" | "Neutral" | "Negative";
   sentiment_score: number;
   analysed: boolean;
