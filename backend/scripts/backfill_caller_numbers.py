@@ -16,15 +16,15 @@ from app.integrations.myoperator import fetch_call_logs
 def backfill():
     db = SessionLocal()
     page = 0
-    limit = 100
+    limit = 20
     updated = 0
     skipped = 0
     not_found = 0
 
-    from_ts = 0
-    to_ts = int(time.time())
+    from_ts = 1781520361
+    to_ts = 1782926723
 
-    print(f"Starting backfill...")
+    print(f"Starting backfill | from_ts={from_ts} to_ts={to_ts}")
 
     while True:
         offset = page * limit
@@ -70,7 +70,7 @@ def backfill():
             existing.call_direction = existing.call_direction or call_direction
             db.commit()
             updated += 1
-            print(f"Updated: {filename} | {caller_number} | {agent_name} | {call_direction}")
+            print(f"Updated: {caller_number} | {agent_name} | {call_direction}")
 
         page += 1
         time.sleep(0.3)

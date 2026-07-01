@@ -977,6 +977,7 @@ export default function Dashboard() {
                                               <div className="truncate flex flex-col">
                                                 <span className="truncate">{file.caller_number || `Call ${sortedFiles.length - fileIndex}`}</span>
                                                 {file.agent_name && (<span className="truncate text-xs text-brand-text-muted">{file.agent_name}</span>)}
+                                                {file.call_direction && (<span className={`truncate text-xs font-semibold ${file.call_direction === "inbound" ? "text-brand-green" : "text-blue-400"}`}>{file.call_direction === "inbound" ? "Inbound" : "Outbound"}</span>)}
 
                                               </div>
                                             </div>
@@ -1253,6 +1254,7 @@ export default function Dashboard() {
                       <h3 className="font-bold text-white text-base truncate max-w-xs md:max-w-md">
                         {activeAudioFile.caller_number || (() => { const dateKey = new Date(activeAudioFile.created_at).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }); const dayFiles = [...(groupedFilesByDate[dateKey] || [])].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()); const idx = dayFiles.findIndex(f => f.id === activeAudioFile.id); return `Call ${dayFiles.length - idx}`; })()}
                         {activeAudioFile.agent_name && (<span className="ml-2 text-xs text-brand-text-muted font-normal align-middle">{activeAudioFile.agent_name}</span>)}
+                        {activeAudioFile.call_direction && (<span className={`ml-2 text-xs font-semibold align-middle ${activeAudioFile.call_direction === "inbound" ? "text-brand-green" : "text-blue-400"}`}>{activeAudioFile.call_direction === "inbound" ? "Inbound" : "Outbound"}</span>)}
                       </h3>
                       <span className="text-sm text-brand-text-muted font-mono whitespace-nowrap">
                         Duration: <span className="text-white font-semibold">{formatTime(activeAudioFile.duration || 0)}</span>
