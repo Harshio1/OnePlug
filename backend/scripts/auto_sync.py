@@ -56,6 +56,7 @@ try:
                     db_file = db_service.models.AudioFile(
                         filename=filename, file_path=local_path,
                         file_size=file_size, mime_type="audio/mpeg",
+                        caller_number=caller_number,
                         status="pending",
                         created_at=datetime.datetime.utcfromtimestamp(start_time) + datetime.timedelta(hours=5, minutes=30)
                     )

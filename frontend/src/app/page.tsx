@@ -972,7 +972,7 @@ export default function Dashboard() {
                                                 file.status === "completed" ? "text-brand-green" : "text-brand-text-muted"
                                               }`} />
                                               <div className="truncate flex flex-col">
-                                                <span className="truncate">Call {sortedFiles.length - fileIndex}</span>
+                                                <span className="truncate">{file.caller_number || `Call ${sortedFiles.length - fileIndex}`}</span>
 
                                               </div>
                                             </div>

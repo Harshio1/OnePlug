@@ -32,6 +32,7 @@ class AudioFile(Base):
     duration = Column(Float, nullable=True)       # In seconds, determined post-processing
     mime_type = Column(String, nullable=False)    # audio/mpeg, audio/wav, etc.
     status = Column(String, default="pending", nullable=False)  # pending, processing, completed, failed
+    caller_number = Column(String, nullable=True)  # Customer phone number from MyOperator
     error_message = Column(Text, nullable=True)
     
     uploaded_by_id = Column(Integer, ForeignKey("users.id"), nullable=True)

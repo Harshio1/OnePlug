@@ -167,6 +167,7 @@ def sync_recent_calls(db: Session, background_tasks: BackgroundTasks, transcribe
                     file_path=local_path,
                     file_size=file_size,
                     mime_type="audio/mpeg",
+                    caller_number=caller_number,
                     status="pending",
                     created_at=datetime.datetime.utcfromtimestamp(start_time) # original call start time
                 )
