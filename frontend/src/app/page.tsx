@@ -84,6 +84,9 @@ interface AudioFile {
   error_message?: string;
   created_at: string;
   transcript?: Transcript;
+  caller_number?: string;
+  agent_name?: string;
+  call_direction?: string;
 }
 
 export default function Dashboard() {
