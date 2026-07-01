@@ -33,6 +33,8 @@ class AudioFile(Base):
     mime_type = Column(String, nullable=False)    # audio/mpeg, audio/wav, etc.
     status = Column(String, default="pending", nullable=False)  # pending, processing, completed, failed
     caller_number = Column(String, nullable=True)  # Customer phone number from MyOperator
+    agent_name = Column(String, nullable=True)     # Agent who handled the call
+    call_direction = Column(String, nullable=True) # inbound or outbound
     error_message = Column(Text, nullable=True)
     
     uploaded_by_id = Column(Integer, ForeignKey("users.id"), nullable=True)

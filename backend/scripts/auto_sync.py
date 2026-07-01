@@ -41,6 +41,9 @@ try:
                 filename = source.get("filename")
                 start_time = source.get("start_time")
                 caller_number = source.get("caller_number", "Unknown")
+                log_details = source.get("log_details", [])
+                agent_name = log_details[0]["received_by"][0]["name"] if log_details and log_details[0].get("received_by") else None
+                call_direction = "inbound" if source.get("type") == 1 else "outbound"
                 if not filename: continue
 
                 existing = db.query(db_service.models.AudioFile).filter(
@@ -57,6 +60,8 @@ try:
                         filename=filename, file_path=local_path,
                         file_size=file_size, mime_type="audio/mpeg",
                         caller_number=caller_number,
+                        agent_name=agent_name,
+                        call_direction=call_direction,
                         status="pending",
                         created_at=datetime.datetime.utcfromtimestamp(start_time) + datetime.timedelta(hours=5, minutes=30)
                     )

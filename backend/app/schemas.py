@@ -73,6 +73,8 @@ class AudioFileResponse(BaseModel):
     mime_type: str
     status: str
     caller_number: Optional[str] = None
+    agent_name: Optional[str] = None
+    call_direction: Optional[str] = None
     error_message: Optional[str] = None
     uploaded_by_id: Optional[int] = None
     created_at: datetime
@@ -102,6 +104,8 @@ class AudioFileListResponse(BaseModel):
     mime_type: str
     status: str
     caller_number: Optional[str] = None
+    agent_name: Optional[str] = None
+    call_direction: Optional[str] = None
     error_message: Optional[str] = None
     uploaded_by_id: Optional[int] = None
     created_at: datetime

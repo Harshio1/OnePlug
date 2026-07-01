@@ -138,6 +138,9 @@ def sync_recent_calls(db: Session, background_tasks: BackgroundTasks, transcribe
             filename = source.get("filename")
             start_time = source.get("start_time")
             caller_number = source.get("caller_number", "Unknown")
+            log_details = source.get("log_details", [])
+            agent_name = log_details[0]["received_by"][0]["name"] if log_details and log_details[0].get("received_by") else None
+            call_direction = "inbound" if source.get("type") == 1 else "outbound"
             
             # NOTE: Do NOT use the 'seconds' field from the MyOperator response (e.g. source.get("seconds"))
             # to determine call duration, as it does not match end_time - start_time or the formatted duration.
@@ -168,6 +171,8 @@ def sync_recent_calls(db: Session, background_tasks: BackgroundTasks, transcribe
                     file_size=file_size,
                     mime_type="audio/mpeg",
                     caller_number=caller_number,
+                    agent_name=agent_name,
+                    call_direction=call_direction,
                     status="pending",
                     created_at=datetime.datetime.utcfromtimestamp(start_time) # original call start time
                 )
