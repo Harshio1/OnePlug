@@ -109,7 +109,7 @@ export default function Dashboard() {
   const [searchQuery, setSearchQuery] = useState("");
   const [transcriptSearchQuery, setTranscriptSearchQuery] = useState("");
   const [expandedDates, setExpandedDates] = useState<Record<string, boolean>>({});
-  const [selectedCategory, setSelectedCategory] = useState<string>("Support Issues");
+  const [selectedCategory, setSelectedCategory] = useState<string>("All Categories");
   const [selectedSubcategory, setSelectedSubcategory] = useState<string>("All");
 
   const toggleDateGroup = (dateStr: string) => {
