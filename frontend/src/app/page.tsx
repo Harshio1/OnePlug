@@ -950,11 +950,9 @@ export default function Dashboard() {
                                 <table className="w-full text-left border-collapse">
                                   <thead>
                                     <tr className="bg-brand-bg/25 text-brand-text-muted text-[10px] uppercase tracking-wider font-semibold border-b border-brand-border/20">
-                                      <th className="py-3 px-6 w-[35%]">Filename</th>
-                                      <th className="py-3 px-6">Time</th>
-                                      <th className="py-3 px-6">File Size</th>
-                                      <th className="py-3 px-6">Duration</th>
-                                      <th className="py-3 px-6">Transcription Status</th>
+                                      <th className="py-3 px-6 w-[25%]">Call</th>
+                                      <th className="py-3 px-6 w-[40%]">AI Explanation</th>
+                                      <th className="py-3 px-6">Status</th>
                                       <th className="py-3 px-6 text-right">Actions</th>
                                     </tr>
                                   </thead>
@@ -975,21 +973,24 @@ export default function Dashboard() {
                                                 file.status === "completed" ? "text-brand-green" : "text-brand-text-muted"
                                               }`} />
                                               <div className="truncate flex flex-col">
-                                                <span className="truncate">{file.caller_number || `Call ${sortedFiles.length - fileIndex}`}</span>
+                                                <span className="truncate font-semibold">{file.caller_number || `Call ${sortedFiles.length - fileIndex}`}</span>
                                                 {file.agent_name && (<span className="truncate text-xs text-brand-text-muted">{file.agent_name}</span>)}
                                                 {file.call_direction && (<span className={`truncate text-xs font-semibold ${file.call_direction === "inbound" ? "text-brand-green" : "text-blue-400"}`}>{file.call_direction === "inbound" ? "Inbound" : "Outbound"}</span>)}
-
+                                                <span className="text-xs text-brand-text-muted font-mono mt-1">
+                                                  {new Date(file.created_at).toLocaleDateString([], { day: '2-digit', month: 'short', year: 'numeric' })} · {new Date(file.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                </span>
+                                                <span className="text-xs text-brand-text-muted">{file.duration ? formatTime(file.duration) : ""}</span>
                                               </div>
                                             </div>
                                           </td>
-                                          <td className="py-4 px-6 text-xs text-brand-text-muted font-mono">
-                                            {new Date(file.created_at).toLocaleDateString([], { day: '2-digit', month: 'short' })} {new Date(file.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                          </td>
-                                          <td className="py-4 px-6 text-xs text-brand-text-muted font-mono">
-                                            {formatBytes(file.file_size)}
-                                          </td>
-                                          <td className="py-4 px-6 text-xs text-brand-text-muted font-mono">
-                                            {file.duration ? formatTime(file.duration) : "Pending"}
+                                          <td className="py-4 px-6 text-xs text-brand-text-muted max-w-sm">
+                                            {file.transcript?.analysis?.what_happened ? (
+                                              <span className="line-clamp-3 text-xs text-brand-text-muted leading-relaxed">{file.transcript.analysis.what_happened}</span>
+                                            ) : file.transcript?.analysis?.summary ? (
+                                              <span className="line-clamp-3 text-xs text-brand-text-muted leading-relaxed">{file.transcript.analysis.summary}</span>
+                                            ) : (
+                                              <span className="text-brand-text-muted/40 text-xs">—</span>
+                                            )}
                                           </td>
                                           <td className="py-4 px-6">
                                             <div className="flex items-center gap-2">
@@ -1017,11 +1018,6 @@ export default function Dashboard() {
                                           </td>
                                           <td className="py-4 px-6 text-right" onClick={(e) => e.stopPropagation()}>
                                             <div className="flex items-center justify-end gap-2">
-                                              {file.status === "completed" && file.transcript?.analysis?.summary && (
-                                                <span className="text-xs text-brand-text-muted max-w-xs truncate hidden lg:inline-block" title={file.transcript.analysis.summary}>
-                                                  {file.transcript.analysis.summary.slice(0, 60)}...
-                                                </span>
-                                              )}
                                               {file.status === "completed" && (
                                                 <button
                                                   onClick={() => loadTranscriptDetails(file.id)}
