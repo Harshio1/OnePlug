@@ -806,11 +806,11 @@ export default function Dashboard() {
               {/* High-level Category Tabs */}
               <div className="flex border-b border-brand-border space-x-1 p-1 bg-brand-card/30 rounded-xl max-w-fit">
                 {[
+                  { name: "All Categories", label: "All Calls" },
                   { name: "Support Issues", label: "Support Issues" },
                   { name: "Partnership Enquiries", label: "Partnership Enquiries" },
                   { name: "Positive Feedback", label: "Positive Feedback" },
-                  { name: "General & Noise", label: "General & Noise" },
-                  { name: "All Categories", label: "All Calls" }
+                  { name: "General & Noise", label: "General & Noise" }
                 ].map((tab) => (
                   <button
                     key={tab.name}
