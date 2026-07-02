@@ -67,13 +67,8 @@ export default function LoginPage() {
       <div className="w-full max-w-md space-y-8 relative z-10">
         {/* Brand Logo and Title */}
         <div className="flex flex-col items-center">
-          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-brand-card border border-brand-border pulse-green-glow">
-            <BatteryCharging className="h-10 w-10 text-brand-green" />
-          </div>
-          <h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-white">
-            OnePlug <span className="text-brand-green font-extrabold">EV</span>
-          </h2>
-          <p className="mt-2 text-center text-sm text-brand-text-muted">
+          <img src="/logo.png" alt="OnePlug" className="h-24 w-auto object-contain rounded-lg" />
+          <p className="mt-4 text-center text-sm text-brand-text-muted">
             Internal AI Transcription & Call Analytics Platform
           </p>
         </div>
