@@ -706,17 +706,7 @@ export default function Dashboard() {
             {activeTab === "dashboard" ? (
               /* Brand Head Logo */
               <div className="flex items-center gap-3">
-                <div className="h-10 w-10 flex items-center justify-center">
-                  <img src="/logo.png" alt="OnePlug EV" className="h-full w-full object-contain" />
-                </div>
-                <div className="leading-tight">
-                  <h1 className="font-bold text-white tracking-wide text-sm">
-                    OnePlug <span className="text-brand-green">EV</span>
-                  </h1>
-                  <span className="text-[9px] text-brand-text-muted font-mono uppercase tracking-widest block">
-                    AI Speech Portal
-                  </span>
-                </div>
+                <img src="/logo.png" alt="OnePlug" className="h-10 w-auto object-contain rounded-md" />
               </div>
             ) : (
               /* Back to Dashboard Button */
