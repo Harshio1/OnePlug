@@ -950,8 +950,11 @@ export default function Dashboard() {
                                 <table className="w-full text-left border-collapse">
                                   <thead>
                                     <tr className="bg-brand-bg/25 text-brand-text-muted text-[10px] uppercase tracking-wider font-semibold border-b border-brand-border/20">
-                                      <th className="py-3 px-6 w-[25%]">Call</th>
-                                      <th className="py-3 px-6 w-[40%]">AI Explanation</th>
+                                      <th className="py-3 px-6 w-[16%]">Call</th>
+                                      <th className="py-3 px-6 whitespace-nowrap">Date</th>
+                                      <th className="py-3 px-6 whitespace-nowrap">Time</th>
+                                      <th className="py-3 px-6 whitespace-nowrap">Duration</th>
+                                      <th className="py-3 px-6 w-[42%]">AI Explanation</th>
                                       <th className="py-3 px-6">Status</th>
                                       <th className="py-3 px-6 text-right">Actions</th>
                                     </tr>
@@ -976,18 +979,23 @@ export default function Dashboard() {
                                                 <span className="truncate font-semibold">{file.caller_number || `Call ${sortedFiles.length - fileIndex}`}</span>
                                                 {file.agent_name && (<span className="truncate text-xs text-brand-text-muted">{file.agent_name}</span>)}
                                                 {file.call_direction && (<span className={`truncate text-xs font-semibold ${file.call_direction === "inbound" ? "text-brand-green" : "text-blue-400"}`}>{file.call_direction === "inbound" ? "Inbound" : "Outbound"}</span>)}
-                                                <span className="text-xs text-brand-text-muted font-mono mt-1">
-                                                  {new Date(file.created_at).toLocaleDateString([], { day: '2-digit', month: 'short', year: 'numeric' })} · {new Date(file.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                                </span>
-                                                <span className="text-xs text-brand-text-muted">{file.duration ? formatTime(file.duration) : ""}</span>
                                               </div>
                                             </div>
                                           </td>
-                                          <td className="py-4 px-6 text-xs text-brand-text-muted max-w-sm">
+                                          <td className="py-4 px-6 text-xs text-brand-text-muted font-mono whitespace-nowrap">
+                                            {new Date(file.created_at).toLocaleDateString([], { day: '2-digit', month: 'short', year: 'numeric' })}
+                                          </td>
+                                          <td className="py-4 px-6 text-xs text-brand-text-muted font-mono whitespace-nowrap">
+                                            {new Date(file.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                          </td>
+                                          <td className="py-4 px-6 text-xs text-brand-text-muted font-mono whitespace-nowrap">
+                                            {file.duration ? formatTime(file.duration) : "-"}
+                                          </td>
+                                          <td className="py-4 px-6 text-xs text-brand-text-muted">
                                             {file.transcript?.analysis?.what_happened ? (
-                                              <span className="line-clamp-3 text-xs text-brand-text-muted leading-relaxed">{file.transcript.analysis.what_happened}</span>
+                                              <span className="text-xs text-brand-text-muted leading-relaxed whitespace-normal">{file.transcript.analysis.what_happened}</span>
                                             ) : file.transcript?.analysis?.summary ? (
-                                              <span className="line-clamp-3 text-xs text-brand-text-muted leading-relaxed">{file.transcript.analysis.summary}</span>
+                                              <span className="text-xs text-brand-text-muted leading-relaxed whitespace-normal">{file.transcript.analysis.summary}</span>
                                             ) : (
                                               <span className="text-brand-text-muted/40 text-xs">—</span>
                                             )}
