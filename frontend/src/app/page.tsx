@@ -983,7 +983,7 @@ export default function Dashboard() {
                                             </div>
                                           </td>
                                           <td className="py-4 px-6 text-xs text-brand-text-muted font-mono">
-                                            {new Date(file.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                            {new Date(file.created_at).toLocaleDateString([], { day: '2-digit', month: 'short' })} {new Date(file.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                           </td>
                                           <td className="py-4 px-6 text-xs text-brand-text-muted font-mono">
                                             {formatBytes(file.file_size)}
@@ -1017,6 +1017,11 @@ export default function Dashboard() {
                                           </td>
                                           <td className="py-4 px-6 text-right" onClick={(e) => e.stopPropagation()}>
                                             <div className="flex items-center justify-end gap-2">
+                                              {file.status === "completed" && file.transcript?.analysis?.summary && (
+                                                <span className="text-xs text-brand-text-muted max-w-xs truncate hidden lg:inline-block" title={file.transcript.analysis.summary}>
+                                                  {file.transcript.analysis.summary.slice(0, 60)}...
+                                                </span>
+                                              )}
                                               {file.status === "completed" && (
                                                 <button
                                                   onClick={() => loadTranscriptDetails(file.id)}
