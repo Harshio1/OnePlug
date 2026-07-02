@@ -706,8 +706,8 @@ export default function Dashboard() {
             {activeTab === "dashboard" ? (
               /* Brand Head Logo */
               <div className="flex items-center gap-3">
-                <div className="h-9 w-9 rounded-xl bg-brand-bg border border-brand-border flex items-center justify-center pulse-green-glow overflow-hidden">
-                  <img src="/logo.png" alt="OnePlug EV" className="h-full w-full object-contain p-0.5" />
+                <div className="h-10 w-10 flex items-center justify-center">
+                  <img src="/logo.png" alt="OnePlug EV" className="h-full w-full object-contain" />
                 </div>
                 <div className="leading-tight">
                   <h1 className="font-bold text-white tracking-wide text-sm">
