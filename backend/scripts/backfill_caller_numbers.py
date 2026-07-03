@@ -51,7 +51,7 @@ def backfill():
             caller_number = source.get("caller_number", "Unknown")
             log_details = source.get("log_details", [])
             agent_name = log_details[0]["received_by"][0]["name"] if log_details and log_details[0].get("received_by") else None
-            call_direction = "inbound" if source.get("type") == 1 else "outbound"
+            call_direction = "inbound" if source.get("event") == 1 else "outbound"
 
             if not filename:
                 continue
@@ -61,13 +61,14 @@ def backfill():
                 not_found += 1
                 continue
 
-            if existing.caller_number and existing.agent_name and existing.call_direction:
+            direction_changed = existing.call_direction != call_direction
+            if existing.caller_number and existing.agent_name and not direction_changed:
                 skipped += 1
                 continue
 
             existing.caller_number = existing.caller_number or caller_number
             existing.agent_name = existing.agent_name or agent_name
-            existing.call_direction = existing.call_direction or call_direction
+            existing.call_direction = call_direction
             db.commit()
             updated += 1
             print(f"Updated: {caller_number} | {agent_name} | {call_direction}")
