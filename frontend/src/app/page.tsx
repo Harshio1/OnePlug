@@ -95,6 +95,10 @@ export default function Dashboard() {
   // Auth state
   const [username, setUsername] = useState<string>("");
   const [token, setToken] = useState<string | null>(null);
+  const [userRole, setUserRole] = useState<string>("");
+  const [uploadingCustomers, setUploadingCustomers] = useState(false);
+  const [customerUploadMessage, setCustomerUploadMessage] = useState<string | null>(null);
+  const customerFileInputRef = useRef<HTMLInputElement>(null);
   
   // Active Tab
   const [activeTab, setActiveTab] = useState<"dashboard" | "upload" | "viewer">("dashboard");
@@ -276,6 +280,15 @@ export default function Dashboard() {
         setToken(storedToken);
         setUsername(storedUsername);
       });
+      const apiBase = process.env.NEXT_PUBLIC_API_URL || `http://${window.location.hostname}:8002`;
+      fetch(`${apiBase}/api/v1/auth/me`, {
+        headers: { Authorization: `Bearer ${storedToken}` },
+      })
+        .then((res) => (res.ok ? res.json() : null))
+        .then((data) => {
+          if (data && data.role) setUserRole(data.role);
+        })
+        .catch(() => {});
     }
   }, [router]);
 
@@ -335,6 +348,41 @@ export default function Dashboard() {
       console.error("Error fetching calls:", e);
     } finally {
       setLoadingList(false);
+    }
+  }
+
+  async function handleCustomerUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file || !token) return;
+    setUploadingCustomers(true);
+    setCustomerUploadMessage(null);
+    const apiBase = process.env.NEXT_PUBLIC_API_URL || `http://${window.location.hostname}:8002`;
+    const formData = new FormData();
+    formData.append("file", file);
+    try {
+      const res = await fetch(`${apiBase}/api/v1/transcribe/upload-customers`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setCustomerUploadMessage(`Imported ${data.imported} customer record(s)${data.skipped ? `, skipped ${data.skipped}` : ""}.`);
+        fetchAudioFiles();
+      } else if (res.status === 401) {
+        handleLogout();
+      } else {
+        setCustomerUploadMessage(data.detail || "Upload failed.");
+      }
+    } catch (err) {
+      console.error("Error uploading customers:", err);
+      setCustomerUploadMessage("Upload failed. Please try again.");
+    } finally {
+      setUploadingCustomers(false);
+      if (customerFileInputRef.current) customerFileInputRef.current.value = "";
+      setTimeout(() => setCustomerUploadMessage(null), 6000);
     }
   }
 
@@ -763,6 +811,43 @@ export default function Dashboard() {
                   <UploadCloud className="h-4 w-4" />
                   Upload Call
                 </button>
+                <label
+                  className="flex items-center gap-2 bg-brand-card border border-brand-border text-white font-semibold text-xs px-3.5 py-1.5 rounded-lg hover:bg-brand-border transition cursor-pointer"
+                  title="Upload Customer Excel"
+                >
+                  <input
+                    type="file"
+                    accept=".xlsx,.xls,.csv"
+                    className="hidden"
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      const token = localStorage.getItem("oneplug_token");
+                      const apiBase = process.env.NEXT_PUBLIC_API_URL || `http://${window.location.hostname}:8002`;
+                      const formData = new FormData();
+                      formData.append("file", file);
+                      try {
+                        const res = await fetch(`${apiBase}/api/v1/transcribe/upload-customers`, {
+                          method: "POST",
+                          headers: { Authorization: `Bearer ${token}` },
+                          body: formData,
+                        });
+                        const data = await res.json();
+                        if (data.success) {
+                          alert(`✅ Customers uploaded! Imported: ${data.imported}, Skipped: ${data.skipped}`);
+                          window.location.reload();
+                        } else {
+                          alert("❌ Upload failed: " + JSON.stringify(data));
+                        }
+                      } catch (err) {
+                        alert("❌ Upload error: " + err);
+                      }
+                      e.target.value = "";
+                    }}
+                  />
+                  <UploadCloud className="h-4 w-4" />
+                  Upload Customers
+                </label>
               </>
             )}
 
@@ -890,7 +975,37 @@ export default function Dashboard() {
                     >
                       <Loader2 className={`h-4 w-4 ${loadingList ? 'animate-spin text-brand-green' : ''}`} />
                     </button>
+                    {/* Admin-only Customer Excel Upload */}
+                    {(userRole === "admin" || userRole === "manager") && (
+                      <>
+                        <input
+                          type="file"
+                          ref={customerFileInputRef}
+                          accept=".xlsx,.xls,.csv"
+                          onChange={handleCustomerUpload}
+                          className="hidden"
+                        />
+                        <button
+                          onClick={() => customerFileInputRef.current?.click()}
+                          disabled={uploadingCustomers}
+                          className="bg-brand-green hover:bg-brand-green/90 disabled:opacity-60 disabled:cursor-not-allowed text-brand-bg font-semibold text-xs px-3 py-2.5 rounded-lg transition flex items-center gap-2 cursor-pointer"
+                          title="Upload Customer Excel"
+                        >
+                          {uploadingCustomers ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <UploadCloud className="h-4 w-4" />
+                          )}
+                          {uploadingCustomers ? "Uploading..." : "Upload Customers"}
+                        </button>
+                      </>
+                    )}
                   </div>
+                  {customerUploadMessage && (
+                    <div className="w-full md:w-auto text-xs text-brand-green bg-brand-green/10 border border-brand-green/20 rounded-lg px-3 py-2 mt-2 md:mt-0">
+                      {customerUploadMessage}
+                    </div>
+                  )}
                 </div>
 
                 {/* Table Content */}
@@ -965,10 +1080,22 @@ export default function Dashboard() {
                                               <FileAudio className={`h-5 w-5 shrink-0 ${
                                                 file.status === "completed" ? "text-brand-green" : "text-brand-text-muted"
                                               }`} />
-                                              <div className="truncate flex flex-col">
+                                              <div className="truncate flex flex-col gap-0.5">
                                                 <span className="truncate font-semibold">{file.caller_number || `Call ${sortedFiles.length - fileIndex}`}</span>
                                                 {file.agent_name && (<span className="truncate text-xs text-brand-text-muted">{file.agent_name}</span>)}
                                                 {file.call_direction && (<span className={`truncate text-xs font-semibold ${file.call_direction === "inbound" ? "text-brand-green" : "text-blue-400"}`}>{file.call_direction === "inbound" ? "Inbound" : "Outbound"}</span>)}
+                                                {file.customers && file.customers.length > 0 && (
+                                                  <div className="mt-1 flex flex-col gap-0.5">
+                                                    {file.customers.map((c: any, ci: number) => (
+                                                      <div key={ci} className="text-[10px] text-brand-text-muted border-t border-brand-border/20 pt-0.5">
+                                                        {c.customer_name && <span className="text-white font-semibold">{c.customer_name}</span>}
+                                                        {c.vehicle_modal && <span className="ml-1 text-brand-green">· {c.vehicle_modal}</span>}
+                                                        {c.station_name && <span className="ml-1">· {c.station_name}</span>}
+                                                        {c.location && <span className="ml-1 text-brand-text-muted/70">({c.location})</span>}
+                                                      </div>
+                                                    ))}
+                                                  </div>
+                                                )}
                                               </div>
                                             </div>
                                           </td>
@@ -1259,6 +1386,29 @@ export default function Dashboard() {
                         Duration: <span className="text-white font-semibold">{formatTime(activeAudioFile.duration || 0)}</span>
                       </span>
                     </div>
+                    {activeAudioFile.customers && activeAudioFile.customers.length > 0 && (
+                      <div className="w-full flex flex-col gap-2 bg-brand-bg/40 border border-brand-border/30 rounded-lg p-3">
+                        {activeAudioFile.customers.map((c: any, ci: number) => (
+                          <div key={ci} className={`grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-1 text-xs ${ci > 0 ? "pt-2 border-t border-brand-border/20" : ""}`}>
+                            {c.customer_name && <div><span className="text-brand-text-muted">Customer:</span> <span className="text-white font-semibold">{c.customer_name}</span></div>}
+                            {c.register_no && <div><span className="text-brand-text-muted">Reg No:</span> <span className="text-white">{c.register_no}</span></div>}
+                            {c.station_name && <div><span className="text-brand-text-muted">Station:</span> <span className="text-white">{c.station_name}</span></div>}
+                            {c.location && <div><span className="text-brand-text-muted">Location:</span> <span className="text-white">{c.location}</span></div>}
+                            {c.start_date && <div><span className="text-brand-text-muted">Visit Date:</span> <span className="text-white">{c.start_date}</span></div>}
+                            {c.start_soc && <div><span className="text-brand-text-muted">Start SOC:</span> <span className="text-white">{c.start_soc}%</span></div>}
+                            {c.end_soc && <div><span className="text-brand-text-muted">End SOC:</span> <span className="text-white">{c.end_soc}%</span></div>}
+                            {c.total_units && <div><span className="text-brand-text-muted">Total Units:</span> <span className="text-white">{c.total_units}</span></div>}
+                            {c.vehicle_make && <div><span className="text-brand-text-muted">Vehicle Make:</span> <span className="text-white">{c.vehicle_make}</span></div>}
+                            {c.vehicle_modal && <div><span className="text-brand-text-muted">Vehicle Model:</span> <span className="text-white">{c.vehicle_modal}</span></div>}
+                            {c.charger_ownership && <div><span className="text-brand-text-muted">Charger:</span> <span className="text-white">{c.charger_ownership}</span></div>}
+                            {c.rating_feedback && <div><span className="text-brand-text-muted">Rating Feedback:</span> <span className="text-white">{c.rating_feedback}</span></div>}
+                            {c.last_transaction_date && <div><span className="text-brand-text-muted">Last Transaction:</span> <span className="text-white">{c.last_transaction_date}</span></div>}
+                            {c.number_of_rating_stars && <div><span className="text-brand-text-muted">Stars:</span> <span className="text-white">{c.number_of_rating_stars}</span></div>}
+                            {c.rating_comments && <div className="col-span-2 md:col-span-4"><span className="text-brand-text-muted">Comments:</span> <span className="text-white">{c.rating_comments}</span></div>}
+                          </div>
+                        ))}
+                      </div>
+                    )}
 
                     {/* Middle: Audio Player */}
                     <div className="flex-1 w-full max-w-lg md:mx-4">

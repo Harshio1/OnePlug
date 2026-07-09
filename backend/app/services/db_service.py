@@ -79,7 +79,20 @@ def update_audio_file_status(
     return db_file
 
 def get_audio_file(db: Session, file_id: str) -> models.AudioFile:
-    return db.query(models.AudioFile).filter(models.AudioFile.id == file_id).first()
+    audio_file = db.query(models.AudioFile).filter(models.AudioFile.id == file_id).first()
+    if audio_file and audio_file.caller_number:
+        phone = audio_file.caller_number.strip()
+        if phone.startswith("+91"):
+            phone = phone[3:]
+        elif phone.startswith("91") and len(phone) == 12:
+            phone = phone[2:]
+        normalized = "+91" + phone if len(phone) == 10 else audio_file.caller_number
+        audio_file.customers = db.query(models.Customer).filter(
+            models.Customer.mobile_number == normalized
+        ).all()
+    elif audio_file:
+        audio_file.customers = []
+    return audio_file
 
 def get_audio_files(db: Session, skip: int = 0, limit: int = 1000, uploaded_by_id: int = None):
     import datetime
@@ -89,7 +102,27 @@ def get_audio_files(db: Session, skip: int = 0, limit: int = 1000, uploaded_by_i
     query = db.query(models.AudioFile).filter(models.AudioFile.created_at >= thirty_days_ago)
     if uploaded_by_id is not None:
         query = query.filter(models.AudioFile.uploaded_by_id == uploaded_by_id)
-    return query.order_by(models.AudioFile.created_at.desc()).offset(skip).limit(limit).all()
+    audio_files = query.order_by(models.AudioFile.created_at.desc()).offset(skip).limit(limit).all()
+
+    # Attach customer data based on normalized phone number
+    for audio_file in audio_files:
+        if audio_file.caller_number:
+            # Normalize caller number to 10 digits for matching
+            phone = audio_file.caller_number.strip()
+            if phone.startswith("+91"):
+                phone = phone[3:]
+            elif phone.startswith("91") and len(phone) == 12:
+                phone = phone[2:]
+            normalized = "+91" + phone if len(phone) == 10 else audio_file.caller_number
+
+            customers = db.query(models.Customer).filter(
+                models.Customer.mobile_number == normalized
+            ).all()
+            audio_file.customers = customers
+        else:
+            audio_file.customers = []
+
+    return audio_files
 
 # --- Transcript CRUD ---
 def create_transcript(

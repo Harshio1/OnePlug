@@ -65,6 +65,28 @@ class TranscriptResponse(BaseModel):
         from_attributes = True
 
 # --- Audio File Schemas ---
+class CustomerResponse(BaseModel):
+    id: int
+    mobile_number: str
+    customer_name: Optional[str] = None
+    register_no: Optional[str] = None
+    station_name: Optional[str] = None
+    location: Optional[str] = None
+    start_date: Optional[str] = None
+    start_soc: Optional[str] = None
+    end_soc: Optional[str] = None
+    total_units: Optional[str] = None
+    vehicle_make: Optional[str] = None
+    vehicle_modal: Optional[str] = None
+    charger_ownership: Optional[str] = None
+    rating_feedback: Optional[str] = None
+    last_transaction_date: Optional[str] = None
+    number_of_rating_stars: Optional[str] = None
+    rating_comments: Optional[str] = None
+    agent_name: Optional[str] = None
+    class Config:
+        from_attributes = True
+
 class AudioFileResponse(BaseModel):
     id: str
     filename: str
@@ -79,6 +101,7 @@ class AudioFileResponse(BaseModel):
     uploaded_by_id: Optional[int] = None
     created_at: datetime
     transcript: Optional[TranscriptResponse] = None
+    customers: Optional[List[CustomerResponse]] = None
 
     class Config:
         from_attributes = True
@@ -110,6 +133,7 @@ class AudioFileListResponse(BaseModel):
     uploaded_by_id: Optional[int] = None
     created_at: datetime
     transcript: Optional[TranscriptListResponse] = None
+    customers: Optional[List["CustomerResponse"]] = None
 
     class Config:
         from_attributes = True

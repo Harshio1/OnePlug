@@ -344,3 +344,98 @@ def trigger_myoperator_sync(
         
     background_tasks.add_task(run_sync_in_background, process_transcription_task)
     return {"status": "success", "message": "MyOperator sync started in the background."}
+
+
+@router.post("/upload-customers")
+async def upload_customers(
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user),
+):
+    """Upload Excel file with customer data and store in customers table."""
+    import openpyxl
+    import io
+
+    if current_user.role not in PRIVILEGED_ROLES:
+        raise HTTPException(status_code=403, detail="Only admins or managers can upload customer data.")
+
+    if not file.filename.endswith(('.xlsx', '.xls', '.csv')):
+        raise HTTPException(status_code=400, detail="Only Excel or CSV files are supported.")
+
+    contents = await file.read()
+    wb = openpyxl.load_workbook(io.BytesIO(contents), data_only=True)
+    ws = wb.active
+
+    # Find header row (row 2 based on your Excel structure)
+    headers = [str(cell.value).strip() if cell.value else "" for cell in ws[2]]
+
+    def col(name):
+        try:
+            return headers.index(name)
+        except ValueError:
+            return None
+
+    def normalize_phone(phone):
+        if not phone:
+            return None
+        phone = str(phone).strip().replace(" ", "").replace("-", "")
+        if phone.startswith("+91"):
+            phone = phone[3:]
+        elif phone.startswith("91") and len(phone) == 12:
+            phone = phone[2:]
+        elif phone.startswith("0") and len(phone) == 11:
+            phone = phone[1:]
+        return "+91" + phone if len(phone) == 10 else None
+
+    imported = 0
+    skipped = 0
+
+    for row in ws.iter_rows(min_row=3, values_only=True):
+        mobile_raw = row[col("Mobile Number")] if col("Mobile Number") is not None else None
+        mobile = normalize_phone(mobile_raw)
+        if not mobile:
+            skipped += 1
+            continue
+
+        start_date = str(row[col("Start Date")]).strip() if col("Start Date") is not None and row[col("Start Date")] else None
+        customer_name = str(row[col("Customer Name")]).strip() if col("Customer Name") is not None and row[col("Customer Name")] else None
+
+        # Check if same customer + same date already exists
+        existing = db.query(models.Customer).filter(
+            models.Customer.mobile_number == mobile,
+            models.Customer.start_date == start_date
+        ).first()
+
+        data = {
+            "mobile_number": mobile,
+            "customer_name": customer_name,
+            "register_no": str(row[col("Register No")]).strip() if col("Register No") is not None and row[col("Register No")] else None,
+            "station_name": str(row[col("Station Name")]).strip() if col("Station Name") is not None and row[col("Station Name")] else None,
+            "location": str(row[col("Location")]).strip() if col("Location") is not None and row[col("Location")] else None,
+            "start_date": start_date,
+            "start_soc": str(row[col("Start SOC (%)")]).strip() if col("Start SOC (%)") is not None and row[col("Start SOC (%)")] else None,
+            "end_soc": str(row[col("End SOC (%)")]).strip() if col("End SOC (%)") is not None and row[col("End SOC (%)")] else None,
+            "total_units": str(row[col("Total Units")]).strip() if col("Total Units") is not None and row[col("Total Units")] else None,
+            "vehicle_make": str(row[col("Vehicle Make")]).strip() if col("Vehicle Make") is not None and row[col("Vehicle Make")] else None,
+            "vehicle_modal": str(row[col("Vehicle Modal")]).strip() if col("Vehicle Modal") is not None and row[col("Vehicle Modal")] else None,
+            "charger_ownership": str(row[col("Charger Ownership")]).strip() if col("Charger Ownership") is not None and row[col("Charger Ownership")] else None,
+            "rating_feedback": str(row[col("Rating feedback")]).strip() if col("Rating feedback") is not None and row[col("Rating feedback")] else None,
+            "last_transaction_date": str(row[col("Last Transaction Date")]).strip() if col("Last Transaction Date") is not None and row[col("Last Transaction Date")] else None,
+            "number_of_rating_stars": str(row[col("Number of Rating Stars")]).strip() if col("Number of Rating Stars") is not None and row[col("Number of Rating Stars")] else None,
+            "rating_comments": str(row[col("Rating Comments")]).strip() if col("Rating Comments") is not None and row[col("Rating Comments")] else None,
+            "agent_name": str(row[col("Call Center Agent Name")]).strip() if col("Call Center Agent Name") is not None and row[col("Call Center Agent Name")] else None,
+        }
+
+        if existing:
+            for k, v in data.items():
+                if v is not None:
+                    setattr(existing, k, v)
+            db.commit()
+        else:
+            new_customer = models.Customer(**data)
+            db.add(new_customer)
+            db.commit()
+
+        imported += 1
+
+    return {"success": True, "imported": imported, "skipped": skipped}

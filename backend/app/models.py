@@ -71,3 +71,28 @@ class Transcript(Base):
 
     # Relationships
     audio_file = relationship("AudioFile", back_populates="transcript")
+
+
+class Customer(Base):
+    __tablename__ = "customers"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    mobile_number = Column(String, nullable=False, index=True)
+    customer_name = Column(String, nullable=True)
+    register_no = Column(String, nullable=True)
+    station_name = Column(String, nullable=True)
+    location = Column(String, nullable=True)
+    start_date = Column(String, nullable=True)
+    start_soc = Column(String, nullable=True)
+    end_soc = Column(String, nullable=True)
+    total_units = Column(String, nullable=True)
+    vehicle_make = Column(String, nullable=True)
+    vehicle_modal = Column(String, nullable=True)
+    charger_ownership = Column(String, nullable=True)
+    rating_feedback = Column(String, nullable=True)
+    last_transaction_date = Column(String, nullable=True)
+    number_of_rating_stars = Column(String, nullable=True)
+    rating_comments = Column(String, nullable=True)
+    agent_name = Column(String, nullable=True)
+    created_at = Column(DateTime, default=datetime.datetime.utcnow, nullable=False)
+    updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow, nullable=False)
