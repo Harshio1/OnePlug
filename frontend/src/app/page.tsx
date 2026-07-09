@@ -1060,7 +1060,7 @@ export default function Dashboard() {
                               className="bg-brand-bg/40 px-6 py-4 border-b border-brand-border/40 flex justify-between items-center bg-brand-card/20 cursor-pointer hover:bg-brand-card-hover/20 transition-all select-none"
                             >
                               <div className="flex items-center gap-2">
-                                {expandedDates[dateStr] !== false ? (
+                                {expandedDates[dateStr] === true ? (
                                   <ChevronDown className="h-4.5 w-4.5 text-brand-green" />
                                 ) : (
                                   <ChevronRight className="h-4.5 w-4.5 text-brand-text-muted" />
@@ -1072,7 +1072,7 @@ export default function Dashboard() {
                               </span>
                             </div>
 
-                            {expandedDates[dateStr] !== false && (
+                            {expandedDates[dateStr] === true && (
                               <div className="overflow-x-auto">
                                 <table className="w-full text-left border-collapse">
                                   <thead>
