@@ -74,6 +74,27 @@ interface Transcript {
   created_at: string;
 }
 
+interface Customer {
+  id: number;
+  mobile_number: string;
+  customer_name?: string;
+  register_no?: string;
+  station_name?: string;
+  location?: string;
+  start_date?: string;
+  start_soc?: string;
+  end_soc?: string;
+  total_units?: string;
+  vehicle_make?: string;
+  vehicle_modal?: string;
+  charger_ownership?: string;
+  rating_feedback?: string;
+  last_transaction_date?: string;
+  number_of_rating_stars?: string;
+  rating_comments?: string;
+  agent_name?: string;
+}
+
 interface AudioFile {
   id: string;
   filename: string;
@@ -87,6 +108,7 @@ interface AudioFile {
   caller_number?: string;
   agent_name?: string;
   call_direction?: string;
+  customers?: Customer[];
 }
 
 export default function Dashboard() {
