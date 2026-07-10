@@ -1396,7 +1396,8 @@ export default function Dashboard() {
                 /* Dynamic Transcript Viewer Interface */
                 <div className="flex flex-col gap-6 animate-fadeIn">
                                    {/* HEADER SECTION: COMPACT AUDIO & CONTROL BAR */}
-                  <div className="bg-brand-card border border-brand-border rounded-xl p-4 shadow-xl flex flex-col md:flex-row items-center justify-between gap-4">
+                  <div className="bg-brand-card border border-brand-border rounded-xl p-4 shadow-xl flex flex-col gap-4">
+                    <div className="flex flex-col md:flex-row items-center justify-between gap-4 w-full">
                     {/* Left: Filename & Duration */}
                     <div className="flex flex-col md:flex-row items-baseline gap-2 md:gap-4 w-full md:w-auto shrink-0">
                       <h3 className="font-bold text-white text-base truncate max-w-xs md:max-w-md">
@@ -1408,30 +1409,6 @@ export default function Dashboard() {
                         Duration: <span className="text-white font-semibold">{formatTime(activeAudioFile.duration || 0)}</span>
                       </span>
                     </div>
-                    {activeAudioFile.customers && activeAudioFile.customers.length > 0 && (
-                      <div className="w-full flex flex-col gap-2 bg-brand-bg/40 border border-brand-border/30 rounded-lg p-3">
-                        {activeAudioFile.customers.map((c: any, ci: number) => (
-                          <div key={ci} className={`grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-1 text-xs ${ci > 0 ? "pt-2 border-t border-brand-border/20" : ""}`}>
-                            {c.customer_name && <div><span className="text-brand-text-muted">Customer:</span> <span className="text-white font-semibold">{c.customer_name}</span></div>}
-                            {c.register_no && <div><span className="text-brand-text-muted">Reg No:</span> <span className="text-white">{c.register_no}</span></div>}
-                            {c.station_name && <div><span className="text-brand-text-muted">Station:</span> <span className="text-white">{c.station_name}</span></div>}
-                            {c.location && <div><span className="text-brand-text-muted">Location:</span> <span className="text-white">{c.location}</span></div>}
-                            {c.start_date && <div><span className="text-brand-text-muted">Visit Date:</span> <span className="text-white">{c.start_date}</span></div>}
-                            {c.start_soc && <div><span className="text-brand-text-muted">Start SOC:</span> <span className="text-white">{c.start_soc}%</span></div>}
-                            {c.end_soc && <div><span className="text-brand-text-muted">End SOC:</span> <span className="text-white">{c.end_soc}%</span></div>}
-                            {c.total_units && <div><span className="text-brand-text-muted">Total Units:</span> <span className="text-white">{c.total_units}</span></div>}
-                            {c.vehicle_make && <div><span className="text-brand-text-muted">Vehicle Make:</span> <span className="text-white">{c.vehicle_make}</span></div>}
-                            {c.vehicle_modal && <div><span className="text-brand-text-muted">Vehicle Model:</span> <span className="text-white">{c.vehicle_modal}</span></div>}
-                            {c.charger_ownership && <div><span className="text-brand-text-muted">Charger:</span> <span className="text-white">{c.charger_ownership}</span></div>}
-                            {c.rating_feedback && <div><span className="text-brand-text-muted">Rating Feedback:</span> <span className="text-white">{c.rating_feedback}</span></div>}
-                            {c.last_transaction_date && <div><span className="text-brand-text-muted">Last Transaction:</span> <span className="text-white">{c.last_transaction_date}</span></div>}
-                            {c.number_of_rating_stars && <div><span className="text-brand-text-muted">Stars:</span> <span className="text-white">{c.number_of_rating_stars}</span></div>}
-                            {c.rating_comments && <div className="col-span-2 md:col-span-4"><span className="text-brand-text-muted">Comments:</span> <span className="text-white">{c.rating_comments}</span></div>}
-                          </div>
-                        ))}
-                      </div>
-                    )}
-
                     {/* Middle: Audio Player */}
                     <div className="flex-1 w-full max-w-lg md:mx-4">
                       <audio
@@ -1486,6 +1463,31 @@ export default function Dashboard() {
                         )}
                       </div>
                     </div>
+                    </div>
+                    {activeAudioFile.customers && activeAudioFile.customers.length > 0 && (
+                      <div className="w-full flex flex-col gap-2 bg-brand-bg/40 border border-brand-border/30 rounded-lg p-3">
+                        {activeAudioFile.customers.map((c: any, ci: number) => (
+                          <div key={ci} className={`grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-1 text-xs ${ci > 0 ? "pt-2 border-t border-brand-border/20" : ""}`}>
+                            {c.customer_name && <div><span className="text-brand-text-muted">Customer:</span> <span className="text-white font-semibold">{c.customer_name}</span></div>}
+                            {c.register_no && <div><span className="text-brand-text-muted">Reg No:</span> <span className="text-white">{c.register_no}</span></div>}
+                            {c.station_name && <div><span className="text-brand-text-muted">Station:</span> <span className="text-white">{c.station_name}</span></div>}
+                            {c.location && <div><span className="text-brand-text-muted">Location:</span> <span className="text-white">{c.location}</span></div>}
+                            {c.start_date && <div><span className="text-brand-text-muted">Visit Date:</span> <span className="text-white">{c.start_date}</span></div>}
+                            {c.start_soc && <div><span className="text-brand-text-muted">Start SOC:</span> <span className="text-white">{c.start_soc}%</span></div>}
+                            {c.end_soc && <div><span className="text-brand-text-muted">End SOC:</span> <span className="text-white">{c.end_soc}%</span></div>}
+                            {c.total_units && <div><span className="text-brand-text-muted">Total Units:</span> <span className="text-white">{c.total_units}</span></div>}
+                            {c.vehicle_make && <div><span className="text-brand-text-muted">Vehicle Make:</span> <span className="text-white">{c.vehicle_make}</span></div>}
+                            {c.vehicle_modal && <div><span className="text-brand-text-muted">Vehicle Model:</span> <span className="text-white">{c.vehicle_modal}</span></div>}
+                            {c.charger_ownership && <div><span className="text-brand-text-muted">Charger:</span> <span className="text-white">{c.charger_ownership}</span></div>}
+                            {c.rating_feedback && <div><span className="text-brand-text-muted">Rating Feedback:</span> <span className="text-white">{c.rating_feedback}</span></div>}
+                            {c.last_transaction_date && <div><span className="text-brand-text-muted">Last Transaction:</span> <span className="text-white">{c.last_transaction_date}</span></div>}
+                            {c.number_of_rating_stars && <div><span className="text-brand-text-muted">Stars:</span> <span className="text-white">{c.number_of_rating_stars}</span></div>}
+                            {c.rating_comments && <div className="col-span-2 md:col-span-4"><span className="text-brand-text-muted">Comments:</span> <span className="text-white">{c.rating_comments}</span></div>}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
                   </div>
 
                   {/* BOTTOM SECTION: SIDE-BY-SIDE 50/50 SPLIT */}
