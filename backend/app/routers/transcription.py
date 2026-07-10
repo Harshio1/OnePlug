@@ -399,11 +399,14 @@ async def upload_customers(
 
         start_date = str(row[col("Start Date")]).strip() if col("Start Date") is not None and row[col("Start Date")] else None
         customer_name = str(row[col("Customer Name")]).strip() if col("Customer Name") is not None and row[col("Customer Name")] else None
+        station_name = str(row[col("Station Name")]).strip() if col("Station Name") is not None and row[col("Station Name")] else None
 
-        # Check if same customer + same date already exists
+        # Check if same customer + same date + same station already exists
+        # (Same customer can visit different stations on the same day - those are separate records)
         existing = db.query(models.Customer).filter(
             models.Customer.mobile_number == mobile,
-            models.Customer.start_date == start_date
+            models.Customer.start_date == start_date,
+            models.Customer.station_name == station_name
         ).first()
 
         data = {
