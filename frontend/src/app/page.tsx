@@ -1104,14 +1104,16 @@ export default function Dashboard() {
                                               }`} />
                                               <div className="truncate flex flex-col gap-0.5">
                                                 <span className="truncate font-semibold">{file.caller_number || `Call ${sortedFiles.length - fileIndex}`}</span>
+                                                {file.customers && file.customers.length > 0 && file.customers[0].customer_name && (
+                                                  <span className="truncate text-sm font-bold text-white leading-tight">{file.customers[0].customer_name}</span>
+                                                )}
                                                 {file.agent_name && (<span className="truncate text-xs text-brand-text-muted">{file.agent_name}</span>)}
                                                 {file.call_direction && (<span className={`truncate text-xs font-semibold ${file.call_direction === "inbound" ? "text-brand-green" : "text-blue-400"}`}>{file.call_direction === "inbound" ? "Inbound" : "Outbound"}</span>)}
                                                 {file.customers && file.customers.length > 0 && (
                                                   <div className="mt-1 flex flex-col gap-0.5">
                                                     {file.customers.map((c: any, ci: number) => (
                                                       <div key={ci} className="text-[10px] text-brand-text-muted border-t border-brand-border/20 pt-0.5">
-                                                        {c.customer_name && <span className="text-white font-semibold">{c.customer_name}</span>}
-                                                        {c.vehicle_modal && <span className="ml-1 text-brand-green">· {c.vehicle_modal}</span>}
+                                                        {c.vehicle_modal && <span className="text-brand-green">{c.vehicle_modal}</span>}
                                                         {c.station_name && <span className="ml-1">· {c.station_name}</span>}
                                                         {c.location && <span className="ml-1 text-brand-text-muted/70">({c.location})</span>}
                                                       </div>
