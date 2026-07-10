@@ -1086,7 +1086,7 @@ export default function Dashboard() {
                                       <th className="py-3 px-6 text-right">Actions</th>
                                     </tr>
                                   </thead>
-                                  <tbody className="divide-y divide-brand-border/20 text-sm">
+                                  <tbody className="divide-y-4 divide-brand-border/60 text-sm">
                                     {sortedFiles.map((file, fileIndex) => {
                                       const lang = file.transcript?.language || "-";
                                       return (
