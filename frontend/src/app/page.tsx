@@ -661,7 +661,7 @@ export default function Dashboard() {
                    junkWords.some(kw => cleanText === kw || cleanText.includes("person is not available")) ||
                    concern === "none" ||
                    summary === "none" ||
-                   file.filename.toLowerCase().startsWith("none");
+                   (file.filename || "").toLowerCase().startsWith("none");
     
     if (isJunk) {
       return { category: "General & Noise", subcategory: "Junk / Hang-ups", icon: "" };
