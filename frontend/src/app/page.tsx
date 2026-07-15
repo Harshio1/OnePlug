@@ -647,7 +647,7 @@ export default function Dashboard() {
 
   // Classification helper for files
   const getCallCategory = (file: AudioFile) => {
-    const text = ((file.transcript?.text || "") + " " + (file.transcript?.analysis?.what_happened || "")).toLowerCase();
+    const text = ((typeof file.transcript?.text === "string" ? file.transcript.text : "") + " " + (typeof file.transcript?.analysis?.what_happened === "string" ? file.transcript.analysis.what_happened : "")).toLowerCase();
     const summary = (file.transcript?.analysis?.summary || "").toLowerCase();
     const concern = (file.transcript?.analysis?.main_concern || "").toLowerCase();
     const sentiment = file.transcript?.analysis?.sentiment || "Neutral";
@@ -705,8 +705,8 @@ export default function Dashboard() {
   // Filter & Search files logic based on Selected Category and Subcategory
   const filteredFiles = audioFiles.filter(file => {
     // Basic search query matches filename or transcript text
-    const matchesSearch = file.filename.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          (file.transcript?.text || "").toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSearch = (file.filename || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          (typeof file.transcript?.text === "string" ? file.transcript.text : "").toLowerCase().includes(searchQuery.toLowerCase());
     if (!matchesSearch) return false;
     
     const classification = getCallCategory(file);
