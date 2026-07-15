@@ -648,8 +648,8 @@ export default function Dashboard() {
   // Classification helper for files
   const getCallCategory = (file: AudioFile) => {
     const text = ((typeof file.transcript?.text === "string" ? file.transcript.text : "") + " " + (typeof file.transcript?.analysis?.what_happened === "string" ? file.transcript.analysis.what_happened : "")).toLowerCase();
-    const summary = (file.transcript?.analysis?.summary || "").toLowerCase();
-    const concern = (file.transcript?.analysis?.main_concern || "").toLowerCase();
+    const summary = (typeof file.transcript?.analysis?.summary === "string" ? file.transcript.analysis.summary : "").toLowerCase();
+    const concern = (typeof file.transcript?.analysis?.main_concern === "string" ? file.transcript.analysis.main_concern : "").toLowerCase();
     const sentiment = file.transcript?.analysis?.sentiment || "Neutral";
     const issues = file.transcript?.analysis?.all_issues || [];
     

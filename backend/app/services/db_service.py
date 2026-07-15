@@ -104,29 +104,7 @@ def get_audio_files(db: Session, skip: int = 0, limit: int = 1000, uploaded_by_i
     query = db.query(models.AudioFile).filter(models.AudioFile.created_at >= thirty_days_ago)
     if uploaded_by_id is not None:
         query = query.filter(models.AudioFile.uploaded_by_id == uploaded_by_id)
-    audio_files = query.order_by(models.AudioFile.created_at.desc()).offset(skip).limit(limit).all()
-
-    # Attach customer data based on normalized phone number
-    for audio_file in audio_files:
-        if audio_file.caller_number:
-            # Normalize caller number to 10 digits for matching
-            phone = audio_file.caller_number.strip()
-            if phone.startswith("+91"):
-                phone = phone[3:]
-            elif phone.startswith("91") and len(phone) == 12:
-                phone = phone[2:]
-            normalized = "+91" + phone if len(phone) == 10 else audio_file.caller_number
-            call_date_str = audio_file.created_at.strftime("%d-%m-%Y")
-
-            customers = db.query(models.Customer).filter(
-                models.Customer.mobile_number == normalized,
-                models.Customer.start_date == call_date_str
-            ).all()
-            audio_file.customers = customers
-        else:
-            audio_file.customers = []
-
-    return audio_files
+    return query.order_by(models.AudioFile.created_at.desc()).offset(skip).limit(limit).all()
 
 # --- Transcript CRUD ---
 def create_transcript(
